@@ -1,0 +1,23 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["selectRelationCount", "orderByRelation", "orderByAggregateGroup"]
+}
+
+model Image {
+  id      Int    @id @default(autoincrement())
+  content String
+  original String?
+  Drink   Drink? @relation(fields: [drinkId], references: [id])
+  drinkId Int?
+}
+
+model Drink {
+  id     Int     @id @default(autoincrement())
+  name   String
+  images Image[]
+}
