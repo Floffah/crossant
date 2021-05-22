@@ -34,6 +34,13 @@ export default class ContentManager {
     }
 
     async createDrink(name: string, imgs: (number | string)[]) {
+        const existed = await this.bot.db.drink.findFirst({
+            where: {
+                name,
+            },
+        });
+        if (existed) return;
+
         const connect: Prisma.ImageWhereUniqueInput[] = [];
 
         for (const img of imgs) {

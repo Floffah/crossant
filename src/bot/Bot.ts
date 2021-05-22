@@ -117,7 +117,7 @@ export default class Bot extends Client {
                 activities: [
                     {
                         name: Mustache.render(newstatus[1], {
-                            customers: this.users.cache.size, //this.totalmembers,
+                            customers: this.users.cache.size,
                         }),
                         type: newstatus[0],
                     },
@@ -134,6 +134,19 @@ export default class Bot extends Client {
         setInterval(() => presencer(), 10000);
 
         this.logger.info("ready");
+
+        this.cm.createDrink("ajuice", [
+            "https://ui.assets-asda.com/dm/asdagroceries/5051413288191_T1?defaultImage=asdagroceries/noImage&resMode=sharp2&id=uuiSh1&fmt=jpg&fit=constrain,1&wid=256&hei=256",
+        ]);
+        this.cm.createDrink("totallynotalcohol", [
+            "http://lh3.googleusercontent.com/-i5ulqKHVAKU/VmqD6m1eqII/AAAAAAAACD8/rPnESOWzAHE/s640/blogger-image-1791737332.jpg",
+        ]);
+        this.cm.createDrink("ribena", [
+            "https://www.ribena.co.uk/product_images/_orig/306.png",
+        ]);
+        this.cm.createDrink("cherry", [
+            "https://media.discordapp.net/attachments/773812178348277810/845767659270176788/invert.png",
+        ]);
     }
 
     async interaction(i: Interaction) {

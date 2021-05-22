@@ -23,6 +23,10 @@ export default class Order extends Command {
                         name: "Hot & fermented Ribena",
                         value: "totallynotalcohol",
                     },
+                    {
+                        name: "Cherry juice",
+                        value: "cherry",
+                    },
                 ],
             },
         ]);
