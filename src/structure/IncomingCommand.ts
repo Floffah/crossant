@@ -1,4 +1,5 @@
 import {
+    Channel,
     CommandInteraction,
     CommandInteractionOption,
     Guild,
@@ -7,10 +8,12 @@ import {
     User,
 } from "discord.js";
 import Bot from "../bot/Bot";
+import Command from "./Command";
 
 export interface IncomingCommandOpts {
     bot: Bot;
     rawInteraction?: CommandInteraction;
+    command: Command;
 }
 
 export interface IncomingCommandMessageOptions {
@@ -20,13 +23,16 @@ export interface IncomingCommandMessageOptions {
 export default class IncomingCommand {
     rawInteraction?: CommandInteraction;
     guild?: Guild;
+    channel?: Channel;
     user?: User;
     member?: GuildMember;
     bot: Bot;
     options: CommandInteractionOption[];
+    command: Command;
 
     constructor(i: IncomingCommandOpts) {
         this.bot = i.bot;
+        this.command = i.command;
         if (i.rawInteraction) {
             this.rawInteraction = i.rawInteraction;
             if (this.rawInteraction.guild)
@@ -36,6 +42,8 @@ export default class IncomingCommand {
                 this.member = this.rawInteraction.member;
             if (this.rawInteraction.options)
                 this.options = this.rawInteraction.options;
+            if (this.rawInteraction.channel)
+                this.channel = this.rawInteraction.channel;
         }
     }
 
@@ -56,11 +64,11 @@ export default class IncomingCommand {
             this.rawInteraction.isCommand() &&
             this.rawInteraction.command
         ) {
-            await this.rawInteraction.reply(c);
+            return await this.rawInteraction.reply(c);
         }
     }
 
     async reject(reason: string, options: IncomingCommandMessageOptions = {}) {
-        return this.reply("Command rejected: " + reason, options);
+        return await this.reply("Command rejected: " + reason, options);
     }
 }

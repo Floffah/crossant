@@ -2,6 +2,7 @@ import Command from "../../structure/Command";
 import IncomingCommand from "../../structure/IncomingCommand";
 import Mustache from "mustache";
 import { User } from "discord.js";
+import { commandValidation } from "../../util/commands";
 
 export default class Unfortunate extends Command {
     unfortunates: string[] = [
@@ -18,6 +19,8 @@ export default class Unfortunate extends Command {
     }
 
     async incoming(i: IncomingCommand) {
+        await commandValidation(i);
+
         const dat: { [k: string]: string } = {
             user: "N/A",
         };

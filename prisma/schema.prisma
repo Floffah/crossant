@@ -8,6 +8,8 @@ generator client {
   previewFeatures = ["selectRelationCount", "orderByRelation", "orderByAggregateGroup"]
 }
 
+// content delivery
+
 model Image {
   id      Int    @id @default(autoincrement())
   content String
@@ -16,8 +18,24 @@ model Image {
   drinkId Int?
 }
 
+// /order
+
 model Drink {
   id     Int     @id @default(autoincrement())
   name   String
   images Image[]
+}
+
+// guilds
+model Guild {
+    id String @id
+
+    channelListMode ListMode
+    channelList String[]
+}
+
+// common
+enum ListMode {
+    Blacklist
+    Whitelist
 }

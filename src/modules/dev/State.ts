@@ -1,5 +1,6 @@
 import Command from "../../structure/Command";
 import IncomingCommand from "../../structure/IncomingCommand";
+import { commandValidation } from "../../util/commands";
 
 export default class State extends Command {
     constructor() {
@@ -45,7 +46,9 @@ export default class State extends Command {
         ]);
     }
 
-    incoming(i: IncomingCommand) {
+    async incoming(i: IncomingCommand) {
+        await commandValidation(i);
+
         let key: undefined | string,
             value: undefined | string | boolean | number,
             type: undefined | string = undefined;
@@ -80,7 +83,7 @@ export default class State extends Command {
 
         this.module.bot.state[key] = value;
 
-        i.reply(`${key} is now set to ${value} (${type})`, {
+        await i.reply(`${key} is now set to ${value} (${type})`, {
             debug: { key, value, type },
         });
 

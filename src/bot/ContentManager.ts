@@ -55,7 +55,7 @@ export default class ContentManager {
             }
         }
 
-        await this.bot.db.drink.create({
+        return await this.bot.db.drink.create({
             data: {
                 name,
                 images: {

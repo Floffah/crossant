@@ -1,6 +1,7 @@
 import Command from "../../structure/Command";
 import IncomingCommand from "../../structure/IncomingCommand";
 import { defaultEmbed } from "../../util/embeds";
+import { commandValidation } from "../../util/commands";
 
 export default class Order extends Command {
     constructor() {
@@ -33,6 +34,8 @@ export default class Order extends Command {
     }
 
     async incoming(i: IncomingCommand) {
+        await commandValidation(i);
+
         if (i.options.length !== 1) throw "Options are required";
         const drink = i.options[0].value as string;
 

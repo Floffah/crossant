@@ -135,16 +135,16 @@ export default class Bot extends Client {
 
         this.logger.info("ready");
 
-        this.cm.createDrink("ajuice", [
+        await this.cm.createDrink("ajuice", [
             "https://ui.assets-asda.com/dm/asdagroceries/5051413288191_T1?defaultImage=asdagroceries/noImage&resMode=sharp2&id=uuiSh1&fmt=jpg&fit=constrain,1&wid=256&hei=256",
         ]);
-        this.cm.createDrink("totallynotalcohol", [
+        await this.cm.createDrink("totallynotalcohol", [
             "http://lh3.googleusercontent.com/-i5ulqKHVAKU/VmqD6m1eqII/AAAAAAAACD8/rPnESOWzAHE/s640/blogger-image-1791737332.jpg",
         ]);
-        this.cm.createDrink("ribena", [
+        await this.cm.createDrink("ribena", [
             "https://www.ribena.co.uk/product_images/_orig/306.png",
         ]);
-        this.cm.createDrink("cherry", [
+        await this.cm.createDrink("cherry", [
             "https://media.discordapp.net/attachments/773812178348277810/845767659270176788/invert.png",
         ]);
     }
@@ -153,16 +153,24 @@ export default class Bot extends Client {
         if (i.isCommand() && i.command && this.commands.has(i.command.name)) {
             const cmd = this.commands.get(i.command.name);
             if (!cmd) return;
-            const inc = new IncomingCommand({ rawInteraction: i, bot: this });
+            const inc = new IncomingCommand({
+                rawInteraction: i,
+                bot: this,
+                command: cmd,
+            });
             try {
-                cmd.incoming(inc);
+                await cmd.incoming(inc);
             } catch (e) {
-                await inc.reject(e.message, {
-                    debug: {
-                        message: e.message,
-                        name: e.name,
-                    },
-                });
+                if (typeof e === "string") {
+                    await inc.reject(e);
+                } else {
+                    await inc.reject(e.message, {
+                        debug: {
+                            message: e.message,
+                            name: e.name,
+                        },
+                    });
+                }
             }
         }
     }
