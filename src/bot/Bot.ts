@@ -22,6 +22,7 @@ export const statuses: [ActivityType, string][] = [
     ["PLAYING", "with some bottles"],
     ["WATCHING", "people get drunk"],
     ["WATCHING", "{{ customers }} customers"],
+    ["PLAYING", "{{ random }}, i know what you are doing."],
 ];
 
 export default class Bot extends Client {
@@ -84,6 +85,26 @@ export default class Bot extends Client {
     }
 
     async ready() {
+        // const u = await this.users.fetch("393102866115461121");
+        // await u.send("Eggs?", {
+        //     components: [
+        //         new MessageActionRow({
+        //             components: [
+        //                 new MessageButton({
+        //                     customID: "omelette",
+        //                     style: "PRIMARY",
+        //                     label: "Make omellete?",
+        //                 }),
+        //                 new MessageButton({
+        //                     customID: "bin",
+        //                     style: "SECONDARY",
+        //                     label: "THROW IN BIN",
+        //                 }),
+        //             ],
+        //         }),
+        //     ],
+        // });
+
         for (const m of this.modules.values()) {
             m.ready();
         }
@@ -113,11 +134,22 @@ export default class Bot extends Client {
         const presencer = async () => {
             const newstatus = statuses[this.currentstatus];
 
+            const g =
+                this.guilds.cache.array()[
+                    Math.floor(Math.random() * this.guilds.cache.size)
+                ];
+            await g.members.fetch();
+            const m =
+                g.members.cache.array()[
+                    Math.floor(Math.random() * g.members.cache.size)
+                ];
+
             this.user?.setPresence({
                 activities: [
                     {
                         name: Mustache.render(newstatus[1], {
                             customers: this.users.cache.size,
+                            random: `${m.user.username}#${m.user.discriminator}`,
                         }),
                         type: newstatus[0],
                     },
@@ -129,9 +161,9 @@ export default class Bot extends Client {
                 this.currentstatus = 0;
         };
 
-        presencer();
+        await presencer();
 
-        setInterval(() => presencer(), 10000);
+        setInterval(async () => await presencer(), 10000);
 
         this.logger.info("ready");
 
@@ -150,21 +182,33 @@ export default class Bot extends Client {
     }
 
     async interaction(i: Interaction) {
-        if (i.isCommand() && i.command && this.commands.has(i.command.name)) {
+        if (i.isMessageComponent()) {
+            if (i.customID === "omelette") {
+                i.reply("GOOD IDEA");
+            } else if (i.customID === "bin") {
+                i.reply("I repel such sickening behaviour.");
+            }
+        } else if (
+            i.isCommand() &&
+            i.command &&
+            this.commands.has(i.command.name)
+        ) {
             const cmd = this.commands.get(i.command.name);
             if (!cmd) return;
-            const inc = new IncomingCommand({
-                rawInteraction: i,
-                bot: this,
-                command: cmd,
-            });
+            let oinc: IncomingCommand | undefined = undefined;
             try {
+                const inc = (oinc = new IncomingCommand({
+                    rawInteraction: i,
+                    bot: this,
+                    command: cmd,
+                }));
                 await cmd.incoming(inc);
             } catch (e) {
+                if (!oinc) return;
                 if (typeof e === "string") {
-                    await inc.reject(e);
+                    await oinc.reject(e);
                 } else {
-                    await inc.reject(e.message, {
+                    await oinc.reject(e.message, {
                         debug: {
                             message: e.message,
                             name: e.name,

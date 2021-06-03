@@ -20,7 +20,8 @@ module.exports = {
                 args: "after-used",
                 ignoreRestSiblings: false,
             },
-        ]
+        ],
+        "@typescript-eslint/no-var-requires": "warn",
     },
     settings: {
         prettier: true,
