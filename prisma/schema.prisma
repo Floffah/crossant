@@ -11,14 +11,14 @@ generator client {
 // content delivery
 
 model Image {
-  id      Int    @id @default(autoincrement())
-  content String
+  id       Int     @id @default(autoincrement())
+  content  String
   original String?
-  Drink   Drink? @relation(fields: [drinkId], references: [id])
-  drinkId Int?
+  Drink    Drink?  @relation(fields: [drinkId], references: [id])
+  drinkId  Int?
 }
 
-// /order
+// order
 
 model Drink {
   id     Int     @id @default(autoincrement())
@@ -28,14 +28,14 @@ model Drink {
 
 // guilds
 model Guild {
-    id String @id
+  id String @id
 
-    channelListMode ListMode
-    channelList String[]
+  channelListMode ListMode
+  channelList     String[]
 }
 
 // common
 enum ListMode {
-    Blacklist
-    Whitelist
+  Blacklist
+  Whitelist
 }

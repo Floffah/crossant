@@ -46,6 +46,8 @@ export default class Bot extends Client {
 
     currentstatus = 0;
 
+    dev: boolean;
+
     constructor() {
         super({
             intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MEMBERS"],
@@ -62,6 +64,17 @@ export default class Bot extends Client {
     }
 
     async start() {
+        if (
+            typeof process.env.NODE_ENV === "undefined" ||
+            !process.env.NODE_ENV ||
+            process.env.NODE_ENV === "development"
+        ) {
+            this.dev = true;
+            process.env.NODE_ENV = "development";
+        } else {
+            this.dev = false;
+        }
+
         this.on("ready", () => this.ready());
         this.on("interaction", (i) => this.interaction(i));
 
@@ -131,39 +144,50 @@ export default class Bot extends Client {
             }
         }
 
-        const presencer = async () => {
-            const newstatus = statuses[this.currentstatus];
+        if (!this.dev) {
+            const presencer = async () => {
+                const newstatus = statuses[this.currentstatus];
 
-            const g =
-                this.guilds.cache.array()[
-                    Math.floor(Math.random() * this.guilds.cache.size)
-                ];
-            await g.members.fetch();
-            const m =
-                g.members.cache.array()[
-                    Math.floor(Math.random() * g.members.cache.size)
-                ];
+                const g =
+                    this.guilds.cache.array()[
+                        Math.floor(Math.random() * this.guilds.cache.size)
+                    ];
+                await g.members.fetch();
+                const m =
+                    g.members.cache.array()[
+                        Math.floor(Math.random() * g.members.cache.size)
+                    ];
 
+                this.user?.setPresence({
+                    activities: [
+                        {
+                            name: Mustache.render(newstatus[1], {
+                                customers: this.users.cache.size,
+                                random: `${m.user.username}#${m.user.discriminator}`,
+                            }),
+                            type: newstatus[0],
+                        },
+                    ],
+                });
+
+                this.currentstatus += 1;
+                if (this.currentstatus > statuses.length - 1)
+                    this.currentstatus = 0;
+            };
+
+            await presencer();
+
+            setInterval(async () => await presencer(), 10000);
+        } else {
             this.user?.setPresence({
                 activities: [
                     {
-                        name: Mustache.render(newstatus[1], {
-                            customers: this.users.cache.size,
-                            random: `${m.user.username}#${m.user.discriminator}`,
-                        }),
-                        type: newstatus[0],
+                        name: "in development mode",
+                        type: "PLAYING",
                     },
                 ],
             });
-
-            this.currentstatus += 1;
-            if (this.currentstatus > statuses.length - 1)
-                this.currentstatus = 0;
-        };
-
-        await presencer();
-
-        setInterval(async () => await presencer(), 10000);
+        }
 
         this.logger.info("ready");
 
@@ -182,17 +206,8 @@ export default class Bot extends Client {
     }
 
     async interaction(i: Interaction) {
-        if (i.isMessageComponent()) {
-            if (i.customID === "omelette") {
-                i.reply("GOOD IDEA");
-            } else if (i.customID === "bin") {
-                i.reply("I repel such sickening behaviour.");
-            }
-        } else if (
-            i.isCommand() &&
-            i.command &&
-            this.commands.has(i.command.name)
-        ) {
+        if (i.isCommand() && i.command && this.commands.has(i.command.name)) {
+            //await i.defer({ ephemeral: true });
             const cmd = this.commands.get(i.command.name);
             if (!cmd) return;
             let oinc: IncomingCommand | undefined = undefined;

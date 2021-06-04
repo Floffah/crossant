@@ -7,6 +7,8 @@ require("dotenv").config();
 
 (async () => {
     if (existsSync(resolve(__dirname, "PROD"))) {
+        process.env.NODE_ENV = "production";
+
         await execa.command("yarn", {
             cwd: process.cwd(),
             stdio: "inherit",
@@ -23,6 +25,8 @@ require("dotenv").config();
             stdio: "inherit",
             env: process.env,
         });
+    } else {
+        process.env.NODE_ENV = "development";
     }
 
     if (!existsSync(resolve(__dirname, "dist", "crossant.js"))) {
