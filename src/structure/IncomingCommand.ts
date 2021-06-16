@@ -16,11 +16,12 @@ export interface IncomingCommandOpts {
     bot: Bot;
     rawInteraction?: CommandInteraction;
     command: Command;
+    deferred?: boolean;
 }
 
 export interface IncomingCommandMessageOptions {
     debug?: { [k: string]: string | number | boolean };
-    embeds?: MessageEmbed[]
+    embeds?: MessageEmbed[];
 }
 
 export default class IncomingCommand {
@@ -30,8 +31,9 @@ export default class IncomingCommand {
     user: User;
     member?: GuildMember;
     bot: Bot;
-    options: Collection<string, CommandInteractionOption>
+    options: Collection<string, CommandInteractionOption>;
     command: Command;
+    deferred?: boolean;
 
     constructor(i: IncomingCommandOpts) {
         this.bot = i.bot;
@@ -42,24 +44,37 @@ export default class IncomingCommand {
                 this.guild = this.rawInteraction.guild;
             this.user = this.rawInteraction.user;
             if (this.rawInteraction.member) {
-                if (!Object.prototype.hasOwnProperty.call(this.rawInteraction.member, "bannable") && this.guild) {
-                    this.rawInteraction.member = this.rawInteraction.member as APIInteractionGuildMember;
-                    const found = this.guild.members.resolve(this.rawInteraction.user.id);
-                    if(found) this.member = found;
-                } else if(Object.prototype.hasOwnProperty.call(this.rawInteraction.member, "bannable")) {
-                    this.rawInteraction.member = this.rawInteraction.member as GuildMember;
+                if (
+                    !Object.prototype.hasOwnProperty.call(
+                        this.rawInteraction.member,
+                        "bannable",
+                    ) &&
+                    this.guild
+                ) {
+                    this.rawInteraction.member = this.rawInteraction
+                        .member as APIInteractionGuildMember;
+                    const found = this.guild.members.resolve(
+                        this.rawInteraction.user.id,
+                    );
+                    if (found) this.member = found;
+                } else if (
+                    Object.prototype.hasOwnProperty.call(
+                        this.rawInteraction.member,
+                        "bannable",
+                    )
+                ) {
+                    this.rawInteraction.member = this.rawInteraction
+                        .member as GuildMember;
                     this.member = this.rawInteraction.member;
                 }
             }
             this.options = this.rawInteraction.options;
             this.channel = this.rawInteraction.channel;
+            this.deferred = i.deferred;
         }
     }
 
-    async reply(
-        content?: string,
-        opts: IncomingCommandMessageOptions = {},
-    ) {
+    async reply(content?: string, opts: IncomingCommandMessageOptions = {}) {
         let c = content;
         if (opts.debug && this.bot.state.debug) {
             let debug = "";
@@ -73,10 +88,17 @@ export default class IncomingCommand {
             this.rawInteraction.isCommand() &&
             this.rawInteraction.command
         ) {
-            return await this.rawInteraction.reply({
-                content: c,
-                embeds: opts.embeds
-            });
+            if (this.deferred) {
+                return await this.rawInteraction.editReply({
+                    content: c,
+                    embeds: opts.embeds,
+                });
+            } else {
+                return await this.rawInteraction.reply({
+                    content: c,
+                    embeds: opts.embeds,
+                });
+            }
         }
     }
 

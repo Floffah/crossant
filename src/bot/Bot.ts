@@ -16,6 +16,7 @@ import Logger from "../util/Logger";
 import { PrismaClient } from "@prisma/client";
 import ContentManager from "./ContentManager";
 import Mustache from "mustache";
+import Boards from "../modules/Boards";
 
 export const statuses: [ActivityType, string][] = [
     ["PLAYING", "with the cabinets"],
@@ -50,7 +51,13 @@ export default class Bot extends Client {
 
     constructor() {
         super({
-            intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MEMBERS"],
+            intents: [
+                "GUILDS",
+                "GUILD_MESSAGES",
+                "GUILD_MEMBERS",
+                "GUILD_EMOJIS",
+                "GUILD_MESSAGE_REACTIONS",
+            ],
             partials: [
                 "CHANNEL",
                 "GUILD_MEMBER",
@@ -81,6 +88,7 @@ export default class Bot extends Client {
         this.registerModule(new Bar());
         this.registerModule(new Random());
         this.registerModule(new Dev());
+        this.registerModule(new Boards());
 
         await this.login(process.env.TOKEN);
     }
@@ -207,15 +215,19 @@ export default class Bot extends Client {
 
     async interaction(i: Interaction) {
         if (i.isCommand() && i.command && this.commands.has(i.command.name)) {
-            //await i.defer({ ephemeral: true });
             const cmd = this.commands.get(i.command.name);
             if (!cmd) return;
+            if (cmd.long)
+                await i.defer({
+                    ephemeral: !cmd.isPublic,
+                });
             let oinc: IncomingCommand | undefined = undefined;
             try {
                 const inc = (oinc = new IncomingCommand({
                     rawInteraction: i,
                     bot: this,
                     command: cmd,
+                    deferred: cmd.long,
                 }));
                 await cmd.incoming(inc);
             } catch (e) {

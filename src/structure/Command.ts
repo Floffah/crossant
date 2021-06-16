@@ -7,15 +7,21 @@ export default class Command {
     description: string;
     options?: ApplicationCommandOption[];
     module: Module;
+    long: boolean;
+    isPublic: boolean;
 
     constructor(
         name: string,
         description: string,
         options?: ApplicationCommandOption[],
+        long = true,
+        isPublic = true,
     ) {
         this.name = name;
         this.description = description;
         this.options = options;
+        this.long = long;
+        this.isPublic = isPublic;
     }
 
     async get(): Promise<ApplicationCommandData> {

@@ -30,8 +30,35 @@ model Drink {
 model Guild {
   id String @id
 
+  // -- SETTINGS --
+  // channel list
   channelListMode ListMode
   channelList     String[]
+  // guild board
+  boards          GuildBoard[]
+}
+
+model GuildBoard {
+  id      Int    @id @default(autoincrement())
+  guild   Guild  @relation(fields: [guildId], references: [id])
+  guildId String
+
+  channelId String
+  emoji     String
+
+  messages GuildBoardMessage[]
+}
+
+model GuildBoardMessage {
+  reactedMessageId String
+  messageId        String
+  reactedChannelId String
+  channelId        String
+
+  board GuildBoard @relation(fields: [boardId], references: [id])
+  boardId Int
+
+  @@id([reactedMessageId, reactedChannelId])
 }
 
 // common

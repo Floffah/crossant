@@ -36,7 +36,7 @@ export default class Order extends Command {
     async incoming(i: IncomingCommand) {
         await commandValidation(i);
 
-        const first =  i.options.first();
+        const first = i.options.first();
         if (!first) throw "Options are required";
         const drink = first.value as string;
 
@@ -53,7 +53,7 @@ export default class Order extends Command {
         const img =
             dbdrink.images[Math.floor(Math.random() * dbdrink.images.length)];
 
-        await i.reply("", {
+        await i.reply(undefined, {
             embeds: [
                 defaultEmbed()
                     .setTitle("Your order")
