@@ -30,11 +30,13 @@ export default class Boards extends Module {
 
     async reactionEvent(r: MessageReaction, _u: User | PartialUser) {
         const reaction = await r.fetch();
+        if (!reaction.message.guild) return;
 
         const found = await this.bot.db.guildBoard.findFirst({
             where: {
                 //channelId: reaction.message.channel.id,
                 emoji: reaction.emoji.identifier,
+                guildId: reaction.message.guild.id,
             },
         });
 
