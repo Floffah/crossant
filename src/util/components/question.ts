@@ -85,25 +85,23 @@ export async function startQuestion(
         let msg: Message | undefined = reuse;
 
         const embed = defaultEmbed().setTitle(question.question);
-        const msgdata: Parameters<SendableChannel["send"]> = [
-            "Click one of the buttons below",
-            {
-                embed,
-                components: [
-                    new MessageActionRow({
-                        components: btns,
-                        type: "ACTION_ROW",
-                    }),
-                ],
-            },
-        ];
+        const msgdata = {
+            embeds: [embed],
+            content: "Click one of the buttons below",
+            components: [
+                new MessageActionRow({
+                    components: btns,
+                    type: "ACTION_ROW",
+                }),
+            ],
+        };
 
         if (!msg) {
-            const sent = await ch.send(...msgdata);
+            const sent = await ch.send(msgdata);
             if (Array.isArray(sent)) throw "WHOOPS?";
             msg = sent;
         } else if (msg) {
-            await msg.edit(...msgdata);
+            await msg.edit(msgdata);
         }
 
         if (typeof msg === "undefined") throw "How did we get to this point";
@@ -120,18 +118,16 @@ export async function startQuestion(
             })();
 
         const c = (
-            await ch.awaitMessageComponentInteractions(filter, {
-                max: 1,
-            })
-        ).first();
+            await ch.awaitMessageComponentInteraction(filter)
+        );
 
         if (!c) throw "No collection in collected";
 
-        if (msgdata[1].components && msgdata[1].components[0].components) {
-            for (const comp of msgdata[1].components[0].components) {
+        if (msgdata.components && msgdata.components[0].components) {
+            for (const comp of msgdata.components[0].components) {
                 comp.disabled = true;
             }
-            await c.update(...msgdata);
+            await c.update(msgdata);
         }
         answer.raw = ids.indexOf(c.customID) + "";
     }

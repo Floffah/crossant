@@ -1,5 +1,7 @@
+import { APIInteractionGuildMember } from "discord-api-types";
 import {
     Channel,
+    Collection,
     CommandInteraction,
     CommandInteractionOption,
     Guild,
@@ -18,16 +20,17 @@ export interface IncomingCommandOpts {
 
 export interface IncomingCommandMessageOptions {
     debug?: { [k: string]: string | number | boolean };
+    embeds?: MessageEmbed[]
 }
 
 export default class IncomingCommand {
     rawInteraction?: CommandInteraction;
     guild?: Guild;
-    channel?: Channel;
-    user?: User;
+    channel: Channel;
+    user: User;
     member?: GuildMember;
     bot: Bot;
-    options: CommandInteractionOption[];
+    options: Collection<string, CommandInteractionOption>
     command: Command;
 
     constructor(i: IncomingCommandOpts) {
@@ -37,18 +40,24 @@ export default class IncomingCommand {
             this.rawInteraction = i.rawInteraction;
             if (this.rawInteraction.guild)
                 this.guild = this.rawInteraction.guild;
-            if (this.rawInteraction.user) this.user = this.rawInteraction.user;
-            if (this.rawInteraction.member)
-                this.member = this.rawInteraction.member;
-            if (this.rawInteraction.options)
-                this.options = this.rawInteraction.options;
-            if (this.rawInteraction.channel)
-                this.channel = this.rawInteraction.channel;
+            this.user = this.rawInteraction.user;
+            if (this.rawInteraction.member) {
+                if (!Object.prototype.hasOwnProperty.call(this.rawInteraction.member, "bannable") && this.guild) {
+                    this.rawInteraction.member = this.rawInteraction.member as APIInteractionGuildMember;
+                    const found = this.guild.members.resolve(this.rawInteraction.user.id);
+                    if(found) this.member = found;
+                } else if(Object.prototype.hasOwnProperty.call(this.rawInteraction.member, "bannable")) {
+                    this.rawInteraction.member = this.rawInteraction.member as GuildMember;
+                    this.member = this.rawInteraction.member;
+                }
+            }
+            this.options = this.rawInteraction.options;
+            this.channel = this.rawInteraction.channel;
         }
     }
 
     async reply(
-        content: string | MessageEmbed,
+        content?: string,
         opts: IncomingCommandMessageOptions = {},
     ) {
         let c = content;
@@ -64,7 +73,10 @@ export default class IncomingCommand {
             this.rawInteraction.isCommand() &&
             this.rawInteraction.command
         ) {
-            return await this.rawInteraction.reply(c);
+            return await this.rawInteraction.reply({
+                content: c,
+                embeds: opts.embeds
+            });
         }
     }
 

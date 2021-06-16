@@ -36,8 +36,9 @@ export default class Order extends Command {
     async incoming(i: IncomingCommand) {
         await commandValidation(i);
 
-        if (i.options.length !== 1) throw "Options are required";
-        const drink = i.options[0].value as string;
+        const first =  i.options.first();
+        if (!first) throw "Options are required";
+        const drink = first.value as string;
 
         const dbdrink = await this.module.bot.db.drink.findFirst({
             where: {
@@ -52,10 +53,12 @@ export default class Order extends Command {
         const img =
             dbdrink.images[Math.floor(Math.random() * dbdrink.images.length)];
 
-        await i.reply(
-            defaultEmbed()
-                .setTitle("Your order")
-                .setImage((img as any).original),
-        );
+        await i.reply("", {
+            embeds: [
+                defaultEmbed()
+                    .setTitle("Your order")
+                    .setImage((img as any).original),
+            ],
+        });
     }
 }

@@ -57,7 +57,7 @@ export default class State extends Command {
             if (!i.user || i.user.id !== "221524691079266314")
                 return i.reject("User not whitelisted");
 
-            for (const option of i.options) {
+            for (const option of i.options.values()) {
                 if (option.name === "key" && typeof option.value === "string")
                     key = option.value;
                 if (option.name === "type" && typeof option.value === "string")
