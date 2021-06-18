@@ -31,6 +31,9 @@ export default class Boards extends Module {
     async reactionEvent(r: MessageReaction, _u: User | PartialUser) {
         const reaction = await r.fetch();
         if (!reaction.message.guild) return;
+        if (reaction.me) return;
+        if (reaction.message.author && reaction.message.author.bot) return;
+        if (typeof reaction.count !== "number") return;
 
         const found = await this.bot.db.guildBoard.findFirst({
             where: {
@@ -49,7 +52,7 @@ export default class Boards extends Module {
                 },
             });
 
-            if (existing && reaction.count === 0) {
+            if (existing && reaction.count <= 1) {
                 const ch = (await this.bot.channels.fetch(
                     found.channelId as Snowflake,
                 )) as TextChannel;
@@ -72,6 +75,7 @@ export default class Boards extends Module {
                 return;
             }
 
+            if (reaction.count <= 1) return;
             if (!reaction.message.author) return;
 
             const user = await reaction.message.author.fetch();
