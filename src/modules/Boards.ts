@@ -89,7 +89,7 @@ export default class Boards extends Module {
             let messageContent = "";
 
             if (reaction.message.content)
-                messageContent += reaction.message.content += "\n";
+                messageContent += reaction.message.content + "\n\n";
 
             messageContent += `[Jump](${reaction.message.url})`;
 
