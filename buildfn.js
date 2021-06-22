@@ -25,6 +25,7 @@ async function doBuild() {
             "prisma",
             "@prisma/client",
             "canvas",
+            "chart.js",
         ],
         sourcemap: dev,
     });
