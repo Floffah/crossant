@@ -5,7 +5,7 @@ datasource db {
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["selectRelationCount", "orderByRelation", "orderByAggregateGroup"]
+  previewFeatures = ["selectRelationCount"]
 }
 
 // content delivery
@@ -24,6 +24,29 @@ model Drink {
   id     Int     @id @default(autoincrement())
   name   String
   images Image[]
+}
+
+// users
+
+model User {
+  id String @id
+
+  // opted in to
+  optWordCount Boolean @default(false)
+
+  // stats
+  words WordUse[]
+}
+
+model WordUse {
+  word    String
+  userId  String
+  user    User    @relation(fields: [userId], references: [id])
+  isCurse Boolean @default(false)
+
+  total Int @default(0)
+
+  @@id([word, userId])
 }
 
 // guilds
@@ -55,7 +78,7 @@ model GuildBoardMessage {
   reactedChannelId String
   channelId        String
 
-  board GuildBoard @relation(fields: [boardId], references: [id])
+  board   GuildBoard @relation(fields: [boardId], references: [id])
   boardId Int
 
   @@id([reactedMessageId, reactedChannelId])

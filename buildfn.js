@@ -7,7 +7,7 @@ async function doBuild() {
 
     await buildfn({
         bundle: true,
-        target: "node16.0",
+        target: "node16",
         platform: "node",
         watch: dev,
         color: true,
@@ -19,7 +19,13 @@ async function doBuild() {
         format: "cjs",
         entryPoints: ["./src/index.ts"],
         outfile: "./dist/crossant.js",
-        external: ["ffmpeg-static", "discord.js", "prisma", "@prisma/client"],
+        external: [
+            "ffmpeg-static",
+            "discord.js",
+            "prisma",
+            "@prisma/client",
+            "canvas",
+        ],
         sourcemap: dev,
     });
 }

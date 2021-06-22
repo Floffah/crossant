@@ -17,6 +17,7 @@ import { PrismaClient } from "@prisma/client";
 import ContentManager from "./ContentManager";
 import Mustache from "mustache";
 import Boards from "../modules/Boards";
+import Stats from "../modules/Stats";
 
 export const statuses: [ActivityType, string][] = [
     ["PLAYING", "with the cabinets"],
@@ -28,12 +29,7 @@ export const statuses: [ActivityType, string][] = [
 
 export default class Bot extends Client {
     logger = new Logger();
-    db = new PrismaClient({
-        log:
-            process.env.DEBUG === "true"
-                ? ["query", "info", "error", "warn"]
-                : ["error", "warn"],
-    });
+    db: PrismaClient;
     cm = new ContentManager(this);
 
     commands: Map<string, Command> = new Map();
@@ -57,6 +53,7 @@ export default class Bot extends Client {
                 "GUILD_MEMBERS",
                 "GUILD_EMOJIS",
                 "GUILD_MESSAGE_REACTIONS",
+                "DIRECT_MESSAGES",
             ],
             partials: [
                 "CHANNEL",
@@ -82,6 +79,13 @@ export default class Bot extends Client {
             this.dev = false;
         }
 
+        this.db = new PrismaClient({
+            log:
+                process.env.DEBUG === "true"
+                    ? ["query", "info", "error", "warn"]
+                    : ["error", "warn"],
+        });
+
         this.on("ready", () => this.ready());
         this.on("interaction", (i) => this.interaction(i));
 
@@ -89,6 +93,7 @@ export default class Bot extends Client {
         this.registerModule(new Random());
         this.registerModule(new Dev());
         this.registerModule(new Boards());
+        this.registerModule(new Stats());
 
         await this.login(process.env.TOKEN);
     }
@@ -216,7 +221,14 @@ export default class Bot extends Client {
     async interaction(i: Interaction) {
         if (i.isCommand() && i.command && this.commands.has(i.command.name)) {
             const cmd = this.commands.get(i.command.name);
-            if (!cmd) return;
+            if (!cmd) {
+                await i.reply(
+                    `Command ${i.command.name} not available in the ${
+                        this.dev ? "development" : "production"
+                    } instance of Crossant`,
+                );
+                return;
+            }
             if (cmd.long)
                 await i.defer({
                     ephemeral: !cmd.isPublic,

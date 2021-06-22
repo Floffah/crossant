@@ -36,3 +36,21 @@ export async function commandValidation(i: IncomingCommand) {
         }
     }
 }
+
+export async function userValidation(i: IncomingCommand) {
+    let user = await i.bot.db.user.findFirst({
+        where: {
+            id: i.user.id,
+        },
+    });
+
+    if (!user) {
+        user = await i.bot.db.user.create({
+            data: {
+                id: i.user.id as string,
+            },
+        });
+    }
+
+    return user;
+}

@@ -1,16 +1,20 @@
 import { APIInteractionGuildMember } from "discord-api-types";
 import {
+    BufferResolvable,
     Channel,
     Collection,
     CommandInteraction,
     CommandInteractionOption,
+    FileOptions,
     Guild,
     GuildMember,
+    MessageAttachment,
     MessageEmbed,
     User,
 } from "discord.js";
 import Bot from "../bot/Bot";
 import Command from "./Command";
+import { Stream } from "stream";
 
 export interface IncomingCommandOpts {
     bot: Bot;
@@ -22,6 +26,7 @@ export interface IncomingCommandOpts {
 export interface IncomingCommandMessageOptions {
     debug?: { [k: string]: string | number | boolean };
     embeds?: MessageEmbed[];
+    files?: (FileOptions | BufferResolvable | Stream | MessageAttachment)[];
 }
 
 export default class IncomingCommand {
@@ -92,11 +97,13 @@ export default class IncomingCommand {
                 return await this.rawInteraction.editReply({
                     content: c,
                     embeds: opts.embeds,
+                    files: opts.files,
                 });
             } else {
                 return await this.rawInteraction.reply({
                     content: c,
                     embeds: opts.embeds,
+                    files: opts.files,
                 });
             }
         }
