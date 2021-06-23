@@ -18,7 +18,7 @@ export interface StateContent {
 export default class State {
     bot: Bot;
     state: StateContent = {};
-    datapath = resolve(__dirname, "../../../../", "data");
+    datapath = resolve(__dirname, "../../../", "data");
     path = resolve(this.datapath, "state.json");
 
     constructor(bot: Bot) {
@@ -31,25 +31,27 @@ export default class State {
         if (!existsSync(this.datapath))
             mkdirSync(this.datapath, { recursive: true });
 
-        this.state = parse(readFileSync(this.path, "utf-8"));
+        if (existsSync(this.path)) {
+            this.state = parse(readFileSync(this.path, "utf-8"));
 
-        if (this.state.rebooted && this.state.rebooted.did) {
-            this.state.rebooted.did = false;
+            if (this.state.rebooted && this.state.rebooted.did) {
+                this.state.rebooted.did = false;
 
-            const channel = await this.bot.channels.fetch(
-                this.state.rebooted.channel,
-            );
-            if (channel && channel instanceof TextChannel) {
-                const message = await channel.messages.fetch(
-                    this.state.rebooted.message,
+                const channel = await this.bot.channels.fetch(
+                    this.state.rebooted.channel,
                 );
-
-                if (message) {
-                    await message.reply(
-                        `<@${this.state.rebooted.triggerer}>, rebooted in ${
-                            Date.now() - this.state.rebooted.started
-                        }ms`,
+                if (channel && channel instanceof TextChannel) {
+                    const message = await channel.messages.fetch(
+                        this.state.rebooted.message,
                     );
+
+                    if (message) {
+                        await message.reply(
+                            `<@${this.state.rebooted.triggerer}>, rebooted in ${
+                                Date.now() - this.state.rebooted.started
+                            }ms`,
+                        );
+                    }
                 }
             }
         }
