@@ -43,7 +43,7 @@ require("dotenv").config();
         process.env.NODE_ENV = "development";
     }
 
-    await execa.command("build build", {
+    await execa.command("yarn build build", {
         cwd: process.cwd(),
         stdio: "inherit",
         env: process.env,
