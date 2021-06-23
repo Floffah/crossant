@@ -66,9 +66,9 @@ export default class Stat extends Command {
                     duration: 0,
                 },
                 color: "#FFFFFF",
-                font: {
-                    size: 30,
-                },
+                // font: {
+                //     size: 30, // doesnt work in production
+                // },
             },
             data: {
                 labels,
