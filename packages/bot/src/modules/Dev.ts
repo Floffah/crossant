@@ -8,5 +8,23 @@ export default class Dev extends Module {
 
     load() {
         this.registerCommand(new State());
+
+        this.bot.on("message", (m) => {
+            if (
+                m.mentions.members &&
+                m.author.id === "221524691079266314" &&
+                m.mentions.members.size > 0
+            ) {
+                const mention = m.mentions.members.first();
+
+                if (mention && mention.id === "736604055505469503") {
+                    if (
+                        m.content.includes("reboot") ||
+                        m.content.includes("restart")
+                    ) {
+                    }
+                }
+            }
+        });
     }
 }

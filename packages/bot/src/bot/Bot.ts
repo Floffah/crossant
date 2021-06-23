@@ -18,6 +18,7 @@ import ContentManager from "./ContentManager";
 import Mustache from "mustache";
 import Boards from "../modules/Boards";
 import Stats from "../modules/Stats";
+import State from "./State";
 
 export const statuses: [ActivityType, string][] = [
     ["PLAYING", "with the cabinets"],
@@ -31,6 +32,7 @@ export default class Bot extends Client {
     logger = new Logger();
     db: PrismaClient;
     cm = new ContentManager(this);
+    proc = new State(this);
 
     commands: Map<string, Command> = new Map();
     modules: Map<string, Module> = new Map();

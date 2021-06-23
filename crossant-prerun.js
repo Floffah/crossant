@@ -1,11 +1,26 @@
+import { readFileSync } from "fs";
+
 const execa = require("execa");
-const { doBuild } = require("./packages/bot/build");
 const { resolve } = require("path");
 const { existsSync } = require("fs");
+const { parse } = require("flatted");
 
 require("dotenv").config();
 
 (async () => {
+    let state = {};
+
+    if (existsSync(resolve(__dirname, "data", "state.json"))) {
+        state = parse(
+            readFileSync(resolve(__dirname, "data", "state.json"), "utf-8"),
+        );
+    }
+
+    if (state.pull) {
+        await execa.command("git pull");
+        process.exit();
+    }
+
     if (existsSync(resolve(__dirname, "PROD"))) {
         process.env.NODE_ENV = "production";
 

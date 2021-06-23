@@ -3910,7 +3910,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commitizen@npm:^4.0.3":
+"commitizen@npm:^4.0.3, commitizen@npm:^4.2.4":
   version: 4.2.4
   resolution: "commitizen@npm:4.2.4"
   dependencies:
@@ -4193,11 +4193,13 @@ __metadata:
     "@floffah/build": ^1.0.0
     "@typescript-eslint/eslint-plugin": ^4.28.0
     "@typescript-eslint/parser": ^4.28.0
+    commitizen: ^4.2.4
     cz-conventional-changelog: 3.3.0
     eslint: ^7.29.0
     eslint-config-prettier: ^8.3.0
     estrella: ^1.4.1
     execa: ^5.1.1
+    flatted: ^3.1.1
     husky: ^6.0.0
     lerna: ^4.0.0
     npm-check-updates: ^11.7.1
@@ -4225,7 +4227,7 @@ __metadata:
     dotenv: ^10.0.0
     draftlog: ^1.0.13
     estrella: ^1.4.1
-    execa: ^5.1.1
+    flatted: ^3.1.1
     mustache: ^4.2.0
     prisma: ^2.25.0
     source-map-support: ^0.5.19
@@ -5452,7 +5454,7 @@ discord.js@discordjs/discord.js:
   languageName: node
   linkType: hard
 
-"flatted@npm:^3.1.0":
+"flatted@npm:^3.1.0, flatted@npm:^3.1.1":
   version: 3.1.1
   resolution: "flatted@npm:3.1.1"
   checksum: 1065cd78294ea651b8c1b96c298a3e70893a23da655e2288e40c06d5d9b1ebce4bd977e604678e01065a92580f3de5078d60d9ee4cdcede9a9989859d7eb5057
