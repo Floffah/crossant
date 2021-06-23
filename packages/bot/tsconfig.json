@@ -6,7 +6,7 @@
             "dom",
             "es6",
             "es2017",
-            "esnext.asynciterable",
+            "esnext.asynciterable"
         ],
         "skipLibCheck": true,
         "sourceMap": true,
@@ -26,14 +26,13 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "resolveJsonModule": true,
-        "baseUrl": "../..",
-        "downlevelIteration": true
+        "baseUrl": "."
     },
     "exclude": [
-        "../../node_modules"
+        "node_modules"
     ],
     "include": [
-        "./packages/bot/src/**/*.tsx",
-        "./packages/bot/src/**/*.ts"
+        "./src/**/*.tsx",
+        "./src/**/*.ts"
     ]
 }

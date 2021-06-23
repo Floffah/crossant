@@ -3910,7 +3910,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commitizen@npm:^4.0.3, commitizen@npm:^4.2.4":
+"commitizen@npm:^4.0.3":
   version: 4.2.4
   resolution: "commitizen@npm:4.2.4"
   dependencies:
@@ -4193,7 +4193,6 @@ __metadata:
     "@floffah/build": ^1.0.0
     "@typescript-eslint/eslint-plugin": ^4.28.0
     "@typescript-eslint/parser": ^4.28.0
-    commitizen: ^4.2.4
     cz-conventional-changelog: 3.3.0
     eslint: ^7.29.0
     eslint-config-prettier: ^8.3.0
