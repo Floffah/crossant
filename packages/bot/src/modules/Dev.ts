@@ -24,7 +24,7 @@ export default class Dev extends Module {
                     ) {
                         const pull = m.content.includes("pull");
 
-                        if (pull) awaitthis.bot.proc.notePull();
+                        if (pull) await this.bot.proc.notePull();
                         const sent = await m.channel.send(
                             `Rebooting ${
                                 pull
