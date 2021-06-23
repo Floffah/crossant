@@ -9,7 +9,7 @@ export default class Dev extends Module {
     load() {
         this.registerCommand(new State());
 
-        this.bot.on("message", (m) => {
+        this.bot.on("message", async (m) => {
             if (
                 m.mentions.members &&
                 m.author.id === "221524691079266314" &&
@@ -22,6 +22,18 @@ export default class Dev extends Module {
                         m.content.includes("reboot") ||
                         m.content.includes("restart")
                     ) {
+                        const pull = m.content.includes("pull");
+
+                        if (pull) awaitthis.bot.proc.notePull();
+                        const sent = await m.channel.send(
+                            `Rebooting ${
+                                pull
+                                    ? "and pulling from github"
+                                    : "without pulling from github"
+                            }`,
+                        );
+                        await this.bot.proc.noteReboot(m.author, sent);
+                        process.exit();
                     }
                 }
             }
