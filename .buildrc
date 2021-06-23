@@ -18,7 +18,7 @@
             ]
         },
         {
-            "id": "main",
+            "id": "components",
             "package": "@floffah/components",
             "type": "custom",
             "command": "microbundle",

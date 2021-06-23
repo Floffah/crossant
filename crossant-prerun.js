@@ -1,7 +1,7 @@
 const execa = require("execa");
 const { resolve } = require("path");
-const { existsSync, readFileSync } = require("fs");
-const { parse } = require("flatted");
+const { existsSync, readFileSync, writeFileSync } = require("fs");
+const { parse, stringify } = require("flatted");
 
 require("dotenv").config();
 
@@ -15,7 +15,16 @@ require("dotenv").config();
     }
 
     if (state.pull) {
-        await execa.command("git pull");
+        await execa.command("git pull", {
+            cwd: process.cwd(),
+            stdio: "inherit",
+            env: process.env,
+        });
+        delete state.pull;
+        writeFileSync(
+            resolve(__dirname, "data", "state.json"),
+            stringify(state),
+        );
         process.exit();
     }
 
