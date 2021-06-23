@@ -1,0 +1,32 @@
+{
+    "enableTerminal": true,
+    "packagePrefix": "",
+    "allowedTargets": [
+        "win",
+        "linux"
+    ],
+    "commands": [
+        {
+            "id": "main",
+            "package": "crossant",
+            "type": "custom",
+            "command": "node build",
+            "devcommand": "node build --watch",
+            "runInEnvironments": [
+                "prod",
+                "dev"
+            ]
+        },
+        {
+            "id": "main",
+            "package": "@floffah/components",
+            "type": "custom",
+            "command": "microbundle",
+            "devcommand": "microbundle watch",
+            "runInEnvironments": [
+                "prod",
+                "dev"
+            ]
+        }
+    ]
+}
