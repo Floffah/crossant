@@ -1,8 +1,6 @@
-import { readFileSync } from "fs";
-
 const execa = require("execa");
 const { resolve } = require("path");
-const { existsSync } = require("fs");
+const { existsSync, readFileSync } = require("fs");
 const { parse } = require("flatted");
 
 require("dotenv").config();
