@@ -18,6 +18,8 @@ export default class Dev extends Module {
         this.registerCommand(new State());
 
         this.bot.on("message", async (m) => {
+            m = await m.fetch();
+
             if (
                 m.guild &&
                 m.guild.id === "697340602504970261" &&
