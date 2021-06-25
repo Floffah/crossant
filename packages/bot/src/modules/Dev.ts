@@ -1,9 +1,17 @@
 import Module from "../structure/Module";
 import State from "./dev/State";
+import { Collection, GuildMember, Snowflake } from "discord.js";
 
 export default class Dev extends Module {
     constructor() {
         super("dev");
+    }
+
+    membersHasID(m: Collection<Snowflake, GuildMember>, id: string) {
+        for (const member of m.values()) {
+            if (member.id === id) return true;
+        }
+        return false;
     }
 
     load() {
@@ -13,6 +21,8 @@ export default class Dev extends Module {
             if (
                 m.guild &&
                 m.guild.id === "697340602504970261" &&
+                m.mentions.members &&
+                this.membersHasID(m.mentions.members, "221524691079266314") &&
                 [
                     "697340603066744864",
                     "774699998985191494",
@@ -20,7 +30,7 @@ export default class Dev extends Module {
                 ].includes(m.channel.id)
             ) {
                 m.reply(
-                    "Floffah is not available for support in this server. Please ping another member of support or member of staff to address your issue.",
+                    "Floffah is not available for support in this server. Please ask another member of support or member of staff to address your issue.",
                 );
             }
 
