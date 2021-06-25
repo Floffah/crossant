@@ -58,5 +58,5 @@ require("dotenv").config();
         env: process.env,
     });
 
-    require("./packages/bot/dist/crossant");
+    require("./packages/bot/dist/index");
 })();

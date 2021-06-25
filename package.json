@@ -28,7 +28,7 @@
     "scripts": {
         "prerun": "node crossant-prerun.js",
         "start": "node crossant-prerun.js",
-        "rawstart": "node dist/crossant.js",
+        "rawstart": "node packages/bot/dist/index.js",
         "postinstall": "husky install"
     },
     "workspaces": [

@@ -3,4 +3,5 @@ module.exports = {
     target: "node16",
     sourcemap: true,
     dts: true,
+    clean: true,
 };

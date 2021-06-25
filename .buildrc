@@ -11,7 +11,7 @@
             "package": "crossant",
             "type": "custom",
             "command": "tsup",
-            "devcommand": "tsup watch",
+            "devcommand": "tsup --watch",
             "runInEnvironments": [
                 "prod",
                 "dev"
@@ -22,7 +22,7 @@
             "package": "@floffah/components",
             "type": "custom",
             "command": "tsup",
-            "devcommand": "tsup watch",
+            "devcommand": "tsup --watch",
             "runInEnvironments": [
                 "prod",
                 "dev"

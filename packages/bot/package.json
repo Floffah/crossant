@@ -21,7 +21,7 @@
         "chalk": "^4.1.1",
         "chart.js": "^3.3.2",
         "debug": "^4.3.1",
-        "discord.js": "discordjs/discord.js",
+        "discord.js": "https://github.com/discordjs/discord.js",
         "dotenv": "^10.0.0",
         "draftlog": "^1.0.13",
         "flatted": "^3.1.1",

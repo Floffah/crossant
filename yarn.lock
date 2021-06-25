@@ -190,7 +190,7 @@ __metadata:
   dependencies:
     "@types/node": ^15.12.4
     discord-api-types: ^0.18.1
-    discord.js: discordjs/discord.js
+    discord.js: "https://github.com/discordjs/discord.js"
     tsup: ^4.11.2
     typescript: ^4.3.4
   languageName: unknown
@@ -3536,7 +3536,7 @@ __metadata:
     chart.js: ^3.3.2
     debug: ^4.3.1
     discord-api-types: ^0.18.1
-    discord.js: discordjs/discord.js
+    discord.js: "https://github.com/discordjs/discord.js"
     dotenv: ^10.0.0
     draftlog: ^1.0.13
     flatted: ^3.1.1
@@ -4142,9 +4142,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-discord.js@discordjs/discord.js:
+"discord.js@https://github.com/discordjs/discord.js":
   version: 13.0.0-dev
-  resolution: "discord.js@https://github.com/discordjs/discord.js.git#commit=807ea2d3c197c7c6556bd1c894114932f6657d49"
+  resolution: "discord.js@https://github.com/discordjs/discord.js.git#commit=4714a961b87746b0f85214c756614d276666f285"
   dependencies:
     "@discordjs/collection": ^0.1.6
     "@discordjs/form-data": ^3.0.1
@@ -4154,7 +4154,7 @@ discord.js@discordjs/discord.js:
     discord-api-types: ^0.18.1
     node-fetch: ^2.6.1
     ws: ^7.4.6
-  checksum: 3f7995278a5f444310162ceb82e41a279ee66b65a29f6fedf27ba02dbbe6831aff81f39748a02f498aea9bf10ccf5803ff88c4e44580a913ac862bff34580413
+  checksum: 22acb989adcc5d55d3a49813e3aae1df67ed983451a01e8fbc1b72b629da4102c364b7e903f19adb068eda88423b741b9a3a843e91322c0f29725d870ad2980d
   languageName: node
   linkType: hard
 

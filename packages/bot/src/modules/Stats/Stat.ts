@@ -59,16 +59,17 @@ export default class Stat extends Command {
 
         let canvas = createCanvas(600, 600);
         let chart = new Chart(canvas.getContext("2d"), {
-            type: "doughnut",
+            type: "pie",
             options: {
                 responsive: false,
                 animation: {
                     duration: 0,
                 },
                 color: "#FFFFFF",
-                // font: {
-                //     size: 30, // doesnt work in production
-                // },
+                font: {
+                    family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
+                    size: 18,
+                },
             },
             data: {
                 labels,
@@ -88,6 +89,6 @@ export default class Stat extends Command {
             files: [canvas.toBuffer()],
         });
         canvas = null as unknown as Canvas;
-        chart = null as unknown as Chart<"doughnut", number[], "string">;
+        chart = null as unknown as Chart<"pie", number[], "string">;
     }
 }
