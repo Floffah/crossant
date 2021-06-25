@@ -21,6 +21,7 @@ export default class Dev extends Module {
             if (
                 m.guild &&
                 m.guild.id === "697340602504970261" &&
+                !m.author.bot &&
                 m.mentions.members &&
                 this.membersHasID(m.mentions.members, "221524691079266314") &&
                 [
