@@ -29,9 +29,13 @@ export default class Dev extends Module {
                     "774615671488249908",
                 ].includes(m.channel.id)
             ) {
-                m.reply(
+                const msg = await m.reply(
                     "Floffah is not available for support in this server. Please ask another member of support or member of staff to address your issue.",
                 );
+
+                setTimeout(() => {
+                    if (msg.deleted) msg.delete();
+                }, 20000);
             }
 
             if (
