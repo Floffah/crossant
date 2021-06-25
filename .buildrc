@@ -10,8 +10,8 @@
             "id": "main",
             "package": "crossant",
             "type": "custom",
-            "command": "node build",
-            "devcommand": "node build --watch",
+            "command": "tsup",
+            "devcommand": "tsup watch",
             "runInEnvironments": [
                 "prod",
                 "dev"
@@ -21,8 +21,8 @@
             "id": "components",
             "package": "@floffah/components",
             "type": "custom",
-            "command": "microbundle",
-            "devcommand": "microbundle watch",
+            "command": "tsup",
+            "devcommand": "tsup watch",
             "runInEnvironments": [
                 "prod",
                 "dev"

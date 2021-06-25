@@ -1,9 +1,6 @@
-const { build } = require("estrella");
-
-build({
+export const tsup = {
     ...require("../../common.build"),
     entryPoints: ["./src/index.ts"],
-    outfile: "./dist/crossant.js",
     external: [
         "ffmpeg-static",
         "discord.js",
@@ -12,4 +9,4 @@ build({
         "canvas",
         "chart.js",
     ],
-});
+};
