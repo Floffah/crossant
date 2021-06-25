@@ -35,7 +35,7 @@ export default class Dev extends Module {
                 );
 
                 setTimeout(() => {
-                    if (msg.deleted) msg.delete();
+                    if (msg.deletable) msg.delete();
                 }, 20000);
             }
 
