@@ -20,8 +20,8 @@ export default class Stats extends Module {
 
     isFiller(str: string) {
         const filters: RegExp[] = [
-            /^that/,
-            // /^the/,
+            /^[wt]hat/,
+            /^the[A-z]?/,
             // /^it/,
             /^this/,
             /^well/,
@@ -38,6 +38,11 @@ export default class Stats extends Module {
             /^right/,
             /^m.hm+$/,
             // /he$/,
+            /^with/,
+            /^even/,
+            /^about/,
+            /^were/,
+            /^make/,
         ];
 
         for (const filter of filters) {
