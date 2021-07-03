@@ -24,7 +24,7 @@ export default class Dev extends Module {
             if (
                 m.guild &&
                 m.guild.id === "773811054433927198" &&
-                /\?[A-z]+([A-z]|\s)*/.test(m.content)
+                /^\?[A-z]+([A-z]|\s)*$/.test(m.content)
             ) {
                 await m.reply(
                     CarlMessages[
