@@ -1,6 +1,7 @@
 import Module from "../structure/Module";
 import State from "./dev/State";
 import { Collection, GuildMember, Snowflake } from "discord.js";
+import { CarlMessages } from "../util/messages";
 
 export default class Dev extends Module {
     constructor() {
@@ -19,6 +20,20 @@ export default class Dev extends Module {
 
         this.bot.on("message", async (m) => {
             m = await m.fetch();
+
+            if (
+                m.guild &&
+                m.guild.id === "773811054433927198" &&
+                m.content.startsWith("?") &&
+                m.content.length >= 3
+            ) {
+                await m.reply(
+                    CarlMessages[
+                        Math.floor(Math.random() * CarlMessages.length)
+                    ],
+                );
+                return;
+            }
 
             if (
                 m.guild &&
