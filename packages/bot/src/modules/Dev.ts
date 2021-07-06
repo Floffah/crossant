@@ -39,20 +39,33 @@ export default class Dev extends Module {
                 m.guild.id === "697340602504970261" &&
                 !m.author.bot &&
                 m.mentions.members &&
-                this.membersHasID(m.mentions.members, "221524691079266314") &&
                 [
                     "697340603066744864",
                     "774699998985191494",
                     "774615671488249908",
                 ].includes(m.channel.id)
             ) {
-                const msg = await m.reply(
-                    "Floffah is not available for support in this server. Please ask another member of support or member of staff to address your issue.",
-                );
+                let user;
 
-                setTimeout(() => {
-                    if (msg.deletable) msg.delete();
-                }, 20000);
+                if (
+                    this.membersHasID(m.mentions.members, "221524691079266314")
+                ) {
+                    user = "Floffah";
+                } else if (
+                    this.membersHasID(m.mentions.members, "394638597439094795")
+                ) {
+                    user = "Reverso";
+                }
+
+                if (user) {
+                    const msg = await m.reply(
+                        `${user} is not available for support in this server. Please ask another member of support or member of staff to address your issue.`,
+                    );
+
+                    setTimeout(() => {
+                        if (msg.deletable) msg.delete();
+                    }, 20000);
+                }
             }
 
             if (
