@@ -1,42 +1,28 @@
 {
     "name": "crossant-repo",
     "version": "1.0.0",
-    "main": "packages/bot/dist/crossant.js",
     "license": "MIT",
     "private": true,
     "devDependencies": {
         "@floffah/build": "^1.0.0",
-        "@typescript-eslint/eslint-plugin": "^4.28.0",
-        "@typescript-eslint/parser": "^4.28.0",
+        "@typescript-eslint/eslint-plugin": "^4.28.4",
+        "@typescript-eslint/parser": "^4.28.4",
         "clinic": "^9.0.0",
         "commitizen": "^4.2.4",
         "cz-conventional-changelog": "3.3.0",
-        "eslint": "^7.29.0",
+        "eslint": "^7.31.0",
         "eslint-config-prettier": "^8.3.0",
         "execa": "^5.1.1",
-        "flatted": "^3.1.1",
-        "husky": "^6.0.0",
-        "lerna": "^4.0.0",
-        "npm-check-updates": "^11.7.1",
-        "prettier": "^2.3.1",
-        "prisma": "^2.25.0",
-        "typescript": "^4.3.4"
+        "flatted": "^3.2.1",
+        "npm-check-updates": "^11.8.3",
+        "prettier": "^2.3.2",
+        "prisma": "^2.27.0",
+        "typescript": "^4.3.5"
     },
     "dependencies": {
-        "execa": "^5.1.1"
-    },
-    "scripts": {
-        "prerun": "node crossant-prerun.js",
-        "start": "node crossant-prerun.js",
-        "rawstart": "node packages/bot/dist/index.js",
-        "postinstall": "husky install"
+        "@prisma/client": "^2.27.0"
     },
     "workspaces": [
         "packages/*"
-    ],
-    "config": {
-        "commitizen": {
-            "path": "cz-conventional-changelog"
-        }
-    }
+    ]
 }
