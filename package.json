@@ -25,5 +25,8 @@
     },
     "workspaces": [
         "packages/*"
-    ]
+    ],
+    "scripts": {
+        "vercel-build": "yarn workspace crossant-web next build"
+    }
 }
