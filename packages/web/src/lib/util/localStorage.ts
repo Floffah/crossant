@@ -1,0 +1,1 @@
+export const DarkThemeName = "CrossantDark";

@@ -1,0 +1,23 @@
+{
+    "presets": [
+        "@babel/preset-react",
+        "next/babel"
+    ],
+    "plugins": [
+        [
+            "babel-plugin-styled-components",
+            {
+                "ssr": true,
+                "displayName": true,
+                "preprocess": true,
+                "minify": true,
+                "pure": true,
+                "transpileTemplateLiterals": true
+            }
+        ],
+        "babel-plugin-polished",
+        "@babel/plugin-transform-react-jsx",
+        "@babel/plugin-transform-reserved-words",
+        "graphql-tag"
+    ]
+}

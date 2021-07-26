@@ -5,12 +5,17 @@ module.exports = {
     extends: [
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
+        "plugin:react/recommended",
         "prettier",
-        "plugin:@typescript-eslint/recommended",
+        "next",
     ],
+    globals: {
+        JSX: "readonly",
+    },
     rules: {
         "@typescript-eslint/explicit-module-boundary-types": "off",
         "@typescript-eslint/no-explicit-any": "off",
+        "react/prop-types": "off",
         "no-unused-vars": "off",
         "@typescript-eslint/no-unused-vars": [
             "error",
@@ -23,7 +28,15 @@ module.exports = {
         ],
         "@typescript-eslint/no-var-requires": "warn",
     },
+    parserOptions: {
+        ecmaFeatures: {
+            jsx: true,
+        },
+    },
     settings: {
+        react: {
+            version: "detect",
+        },
         prettier: true,
     },
     env: {
