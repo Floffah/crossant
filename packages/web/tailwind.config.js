@@ -1,11 +1,16 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
 
 module.exports = {
+    important: true,
+    darkMode: "class",
+    i18n: {
+        locales: ["en-US"],
+        defaultLocale: "en-US",
+    },
     purge: [
         "./src/pages/**/*.{js,ts,jsx,tsx}",
         "./src/components/**/*.{js,ts,jsx,tsx}",
     ],
-    darkMode: "class",
     theme: {
         extend: {
             fontFamily: {
@@ -18,7 +23,15 @@ module.exports = {
         },
     },
     variants: {
-        extend: {},
+        extend: {
+            backgroundColor: ["checked"],
+            borderColor: ["checked"],
+            inset: ["checked"],
+            zIndex: ["hover", "active"],
+        },
     },
     plugins: [],
+    future: {
+        purgeLayersByDefault: true,
+    },
 };

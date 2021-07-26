@@ -3,8 +3,10 @@ import Icon from "@mdi/react";
 import { mdiMoonWaxingCrescent, mdiWeatherSunny } from "@mdi/js";
 import { useToggle } from "react-use";
 import { DarkThemeName } from "../../../lib/util/localStorage";
+import { useRouter } from "next/router";
 
 const NavBar: FC = () => {
+    const router = useRouter();
     const [isDark, toggleIsDark] = useToggle(
         typeof localStorage !== "undefined" &&
             localStorage.getItem(DarkThemeName) === "true",
@@ -21,8 +23,11 @@ const NavBar: FC = () => {
     }
 
     return (
-        <div className="w-full bg-gray-200 dark:bg-gray-900 h-12 shadow-lg fixed top-0 left-0 select-none text-gray-600 dark:text-gray-300">
-            <h1 className="text-2xl top-2 left-3 relative w-fit inline">
+        <div className="w-full bg-gray-100 dark:bg-gray-900 h-12 shadow-lg fixed top-0 left-0 select-none text-gray-600 dark:text-gray-300 z-50 cursor-pointer">
+            <h1
+                className="text-2xl top-2 left-3 relative w-fit inline"
+                onClick={() => router.push("/")}
+            >
                 Crossant
             </h1>
             <div
