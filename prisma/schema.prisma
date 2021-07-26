@@ -8,24 +8,6 @@ generator client {
   previewFeatures = ["selectRelationCount"]
 }
 
-// content delivery
-
-model Image {
-  id       Int     @id @default(autoincrement())
-  content  String
-  original String?
-  Drink    Drink?  @relation(fields: [drinkId], references: [id])
-  drinkId  Int?
-}
-
-// order
-
-model Drink {
-  id     Int     @id @default(autoincrement())
-  name   String
-  images Image[]
-}
-
 // users
 
 model User {
@@ -36,17 +18,6 @@ model User {
 
   // stats
   words WordUse[]
-}
-
-model WordUse {
-  word    String
-  userId  String
-  user    User    @relation(fields: [userId], references: [id])
-  isCurse Boolean @default(false)
-
-  total Int @default(0)
-
-  @@id([word, userId])
 }
 
 // guilds
