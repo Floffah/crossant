@@ -1,1 +1,1 @@
-export const DarkThemeName = "CrossantDark";
+export const ThemeName = "CrossantTheme";

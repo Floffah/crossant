@@ -5,22 +5,22 @@
     "private": true,
     "devDependencies": {
         "@floffah/build": "^1.0.0",
-        "@typescript-eslint/eslint-plugin": "^4.28.4",
-        "@typescript-eslint/parser": "^4.28.4",
+        "@typescript-eslint/eslint-plugin": "^4.29.0",
+        "@typescript-eslint/parser": "^4.29.0",
         "clinic": "^9.0.0",
         "commitizen": "^4.2.4",
         "cz-conventional-changelog": "3.3.0",
-        "eslint": "^7.31.0",
+        "eslint": "^7.32.0",
         "eslint-config-prettier": "^8.3.0",
         "execa": "^5.1.1",
-        "flatted": "^3.2.1",
+        "flatted": "^3.2.2",
         "npm-check-updates": "^11.8.3",
         "prettier": "^2.3.2",
-        "prisma": "^2.27.0",
+        "prisma": "^2.28.0",
         "typescript": "^4.3.5"
     },
     "dependencies": {
-        "@prisma/client": "^2.27.0",
+        "@prisma/client": "^2.28.0",
         "eslint-config-next": "^11.0.1"
     },
     "workspaces": [

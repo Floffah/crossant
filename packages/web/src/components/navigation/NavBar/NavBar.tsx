@@ -1,26 +1,12 @@
 import React, { FC } from "react";
 import Icon from "@mdi/react";
 import { mdiMoonWaxingCrescent, mdiWeatherSunny } from "@mdi/js";
-import { useToggle } from "react-use";
-import { DarkThemeName } from "../../../lib/util/localStorage";
 import { useRouter } from "next/router";
+import { useSwitchTheme } from "../../../lib/hooks/theme";
 
 const NavBar: FC = () => {
     const router = useRouter();
-    const [isDark, toggleIsDark] = useToggle(
-        typeof localStorage !== "undefined" &&
-            localStorage.getItem(DarkThemeName) === "true",
-    );
-
-    if (typeof localStorage !== "undefined") {
-        console.log(
-            isDark,
-            localStorage.getItem(DarkThemeName),
-            isDark && localStorage.getItem(DarkThemeName) !== "true",
-        );
-        if (isDark && localStorage.getItem(DarkThemeName) !== "true")
-            toggleIsDark();
-    }
+    const { switchTheme, theme } = useSwitchTheme();
 
     return (
         <div className="w-full bg-gray-100 dark:bg-gray-900 h-12 shadow-lg fixed top-0 left-0 select-none text-gray-600 dark:text-gray-300 z-50 cursor-pointer">
@@ -33,18 +19,15 @@ const NavBar: FC = () => {
             <div
                 className="inline float-right top-3 right-3 relative 2xl:cursor-pointer"
                 onClick={() => {
-                    if (document.documentElement.className.includes("dark")) {
-                        document.documentElement.classList.remove("dark");
-                        localStorage.setItem(DarkThemeName, "false");
-                    } else {
-                        document.documentElement.classList.add("dark");
-                        localStorage.setItem(DarkThemeName, "true");
-                    }
-                    toggleIsDark();
+                    switchTheme();
                 }}
             >
                 <Icon
-                    path={isDark ? mdiWeatherSunny : mdiMoonWaxingCrescent}
+                    path={
+                        theme === "dark"
+                            ? mdiWeatherSunny
+                            : mdiMoonWaxingCrescent
+                    }
                     size={1}
                 />
             </div>
