@@ -1,5 +1,6 @@
 .env
-data/state.json
+data
+.crossant
 
 # Created by https://www.toptal.com/developers/gitignore/api/webstorm,intellij,yarn,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=webstorm,intellij,yarn,node

@@ -15,9 +15,6 @@ model User {
 
   // opted in to
   optWordCount Boolean @default(false)
-
-  // stats
-  words WordUse[]
 }
 
 // guilds
