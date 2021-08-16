@@ -1,18 +1,21 @@
+import { Routes } from "discord-api-types/v9";
 import { ApplicationCommandData, Interaction } from "discord.js";
-import Module from "managers/commands/structures/Module";
+import UtilModule from "src/managers/commands/modules/Util";
+import IncomingSlashCommand, {
+    IncomingSlashCommandOptions,
+} from "src/managers/commands/structures/IncomingSlashCommand";
+import Module from "src/managers/commands/structures/Module";
 import SlashCommand, {
     SlashCommandType,
-} from "managers/commands/structures/SlashCommand";
-import Manager from "managers/Manager";
-import ManagersManager from "managers/ManagersManager";
-import UtilModule from "managers/commands/modules/Util";
+} from "src/managers/commands/structures/SlashCommand";
+import Manager from "src/managers/Manager";
+import ManagersManager from "src/managers/ManagersManager";
+import { ApplicationCommandTypes } from "src/util/djs/enums";
+import Logger from "src/util/Logger";
 import BaseCommand, {
     CommandName,
     CommandType,
 } from "./structures/BaseCommand";
-import IncomingSlashCommand, {
-    IncomingSlashCommandOptions,
-} from "managers/commands/structures/IncomingSlashCommand";
 
 export default class CommandsManager extends Manager {
     commands: Map<CommandName, BaseCommand> = new Map();
@@ -30,7 +33,7 @@ export default class CommandsManager extends Manager {
     async load() {
         for (const module of this.initialModules) {
             const m = new module();
-            this.registerModule(m);
+            await this.registerModule(m);
         }
 
         this.managers.bot.client.on("interactionCreate", (i) =>
@@ -39,11 +42,11 @@ export default class CommandsManager extends Manager {
         this.managers.bot.client.on("ready", () => this.ready());
     }
 
-    registerModule(m: Module) {
+    async registerModule(m: Module) {
         m.managers = this.managers;
         this.modules.set(m.name, m);
         this.managers.bot.logger.debug(`Registered module ${m.name}`);
-        if (m.load) m.load(); // send the load event to the module
+        if (m.load) await m.load(); // send the load event to the module
     }
 
     registerCommand(m: Module, c: BaseCommand) {
@@ -71,19 +74,52 @@ export default class CommandsManager extends Manager {
             ) {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                commands.push({ type: "CHAT_INPUT", ...c.rawbuilder.toJSON() });
+                commands.push({
+                    type: ApplicationCommandTypes.CHAT_INPUT,
+                    ...c.rawbuilder.toJSON(),
+                });
             } else
                 commands.push({
-                    type: c.type === CommandType.MESSAGE ? "MESSAGE" : "USER",
+                    type:
+                        c.type === CommandType.MESSAGE
+                            ? ApplicationCommandTypes.MESSAGE
+                            : ApplicationCommandTypes.USER,
                     name: c.name,
                 });
         }
 
-        this.managers.bot.client.application?.commands.set(commands);
+        // const supportGuild = await this.managers.bot.client.guilds.fetch(
+        //     this.managers.bot.config.bot.supportGuild,
+        // );
+        //
+        // await this.managers.bot.client.application?.commands.set([]);
+        // await this.managers.bot.client.application?.commands.set(commands);
+        // await supportGuild.commands.set([]);
+        // await supportGuild.commands.set(commands);
+
+        if (!this.managers.bot.client.application) throw "No application";
+
+        await this.managers.bot.rest.put(
+            Routes.applicationGuildCommands(
+                this.managers.bot.client.application.id,
+                this.managers.bot.config.bot.supportGuild,
+            ),
+            {
+                body: commands,
+            },
+        );
+        await this.managers.bot.rest.put(
+            Routes.applicationCommands(this.managers.bot.client.application.id),
+            {
+                body: commands,
+            },
+        );
 
         for (const m of this.modules.values()) {
             m.ready();
         }
+
+        Logger.inst.info("Bot ready");
     }
 
     async interaction(i: Interaction) {

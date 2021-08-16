@@ -4,6 +4,7 @@ export const tsup: Options = {
     entryPoints: ["./src/cli.ts", "./src/rawstart.ts", "./src/shardstart.ts"],
     external: [
         "discord.js",
+        "@discordjs/*",
         "prisma",
         "@prisma/client",
         "winston",
@@ -14,4 +15,5 @@ export const tsup: Options = {
     bundle: true,
     target: "node16",
     dts: true,
+    sourcemap: true,
 };

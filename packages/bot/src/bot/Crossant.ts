@@ -1,4 +1,4 @@
-// import { createLogger, format, Logger, transports } from "winston";
+import { REST } from "@discordjs/rest";
 import { PrismaClient } from "@prisma/client";
 import chalk from "chalk";
 import { Client } from "discord.js";
@@ -13,6 +13,7 @@ require("dotenv").config();
 
 export default class Crossant {
     client: Client;
+    rest: REST;
 
     managers: ManagersManager;
     db: PrismaClient;
@@ -25,6 +26,9 @@ export default class Crossant {
 
     debugmode = process.env.NODE_ENV === "development";
 
+    readyTime: number;
+    shardmanstarttime?: number;
+
     readConfig() {
         this.config = parse(readFileSync(this.configpath, "utf-8")) as Config;
     }
@@ -34,6 +38,16 @@ export default class Crossant {
     }
 
     async init(opts: { debug?: boolean }) {
+        const shardtime = process.argv.find((a) =>
+            a.toLowerCase().startsWith("--shard_time="),
+        );
+        if (shardtime)
+            this.shardmanstarttime = parseInt(
+                shardtime.toLowerCase().replace("--shard_time=", ""),
+            );
+        else if ("SHARD_TIME" in process.env && process.env.SHARD_TIME)
+            this.shardmanstarttime = parseInt(process.env.SHARD_TIME);
+
         if (opts.debug) this.debugmode = true;
 
         this.logger = new Logger();
@@ -88,6 +102,12 @@ export default class Crossant {
 
         this.writeConfig();
 
+        this.client.on("ready", () => this.ready());
+        this.rest = new REST({ version: "9" }).setToken(this.config.bot.token);
         await this.client.login(this.config.bot.token);
+    }
+
+    async ready() {
+        this.readyTime = Date.now();
     }
 }

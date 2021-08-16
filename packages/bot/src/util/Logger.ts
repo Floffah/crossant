@@ -1,6 +1,12 @@
 import chalk from "chalk";
 
 export default class Logger {
+    static inst: Logger;
+
+    constructor() {
+        Logger.inst = this;
+    }
+
     prefix?: string;
     debugEnabled?: boolean;
 

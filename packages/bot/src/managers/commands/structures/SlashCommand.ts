@@ -30,16 +30,14 @@ export default abstract class SlashCommand extends BaseCommand<true> {
             description,
         });
 
-        if (options) {
-            const builder = new SlashCommandBuilder()
-                .setName(name)
-                .setDescription(description);
+        const builder = new SlashCommandBuilder()
+            .setName(name)
+            .setDescription(description);
 
-            options(builder);
+        if (options) options(builder);
 
-            this.options = builder.options;
-            this.rawbuilder = builder;
-        }
+        this.options = builder.options;
+        this.rawbuilder = builder;
 
         this.opts = opts ?? this.baseopts;
         this.aliases = opts?.aliases ?? [];

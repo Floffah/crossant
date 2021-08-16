@@ -20,6 +20,8 @@ export async function startShards() {
 
     const config = parse(readFileSync(configpath, "utf-8"));
 
+    process.env.SHARD_TIME = `${Date.now()}`;
+
     const shards = new ShardingManager(resolve(__dirname, "rawstart.js"), {
         totalShards: "auto",
         mode: "worker",
