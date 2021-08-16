@@ -1,8 +1,8 @@
-import BaseCommand, { BaseCommandOptions, CommandType } from "./BaseCommand";
 import {
     SlashCommandBuilder,
     ToAPIApplicationCommandOptions,
 } from "@discordjs/builders";
+import BaseCommand, { BaseCommandOptions, CommandType } from "./BaseCommand";
 import IncomingSlashCommand from "./IncomingSlashCommand";
 
 export interface SlashCommandOptions extends Partial<BaseCommandOptions> {
@@ -15,13 +15,14 @@ export enum SlashCommandType {
 }
 
 export default abstract class SlashCommand extends BaseCommand<true> {
+    rawbuilder?: SlashCommandBuilder;
     options?: ToAPIApplicationCommandOptions[];
     opts: SlashCommandOptions;
 
     protected constructor(
         name: string,
         description: string,
-        options?: (builder: SlashCommandBuilder) => SlashCommandBuilder,
+        options?: (builder: SlashCommandBuilder) => any | void,
         opts?: SlashCommandOptions,
     ) {
         super(CommandType.CHAT_INPUT, name, {
@@ -29,12 +30,16 @@ export default abstract class SlashCommand extends BaseCommand<true> {
             description,
         });
 
-        if (options)
-            this.options = options(
-                new SlashCommandBuilder()
-                    .setName(name)
-                    .setDescription(description),
-            ).options;
+        if (options) {
+            const builder = new SlashCommandBuilder()
+                .setName(name)
+                .setDescription(description);
+
+            options(builder);
+
+            this.options = builder.options;
+            this.rawbuilder = builder;
+        }
 
         this.opts = opts ?? this.baseopts;
         this.aliases = opts?.aliases ?? [];

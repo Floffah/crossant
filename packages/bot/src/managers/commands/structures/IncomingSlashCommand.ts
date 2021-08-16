@@ -1,6 +1,4 @@
-import IncomingBaseCommand from "./IncomingBaseCommand";
-import { CommandType } from "./BaseCommand";
-import SlashCommand, { SlashCommandType } from "./SlashCommand";
+import { APIInteractionGuildMember } from "discord-api-types";
 import {
     CommandInteraction,
     CommandInteractionOptionResolver,
@@ -9,7 +7,9 @@ import {
     MessageOptions,
 } from "discord.js";
 import ManagersManager from "../../ManagersManager";
-import { APIInteractionGuildMember } from "discord-api-types";
+import { CommandType } from "./BaseCommand";
+import IncomingBaseCommand from "./IncomingBaseCommand";
+import SlashCommand, { SlashCommandType } from "./SlashCommand";
 
 export interface IncomingSlashCommandOptions<
     Type extends SlashCommandType = any,

@@ -13,9 +13,9 @@ import {
     ThreadChannel,
     User,
 } from "discord.js";
+import ManagersManager from "../../ManagersManager";
 import BaseCommand, { CommandType } from "./BaseCommand";
 import SlashCommand from "./SlashCommand";
-import ManagersManager from "../../ManagersManager";
 
 export default class IncomingBaseCommand<
     Type extends CommandType = any,

@@ -2,6 +2,7 @@ import chalk from "chalk";
 
 export default class Logger {
     prefix?: string;
+    debugEnabled?: boolean;
 
     fmtPrefix() {
         return this.prefix || this.prefix === "" ? `(${this.prefix})` : "";
@@ -12,7 +13,8 @@ export default class Logger {
     }
 
     debug(...messages: string[]) {
-        this.log(chalk`{blue debug}${this.fmtPrefix()}`, ...messages);
+        if (this.debugEnabled)
+            this.log(chalk`{blue debug}${this.fmtPrefix()}`, ...messages);
     }
 
     warn(...messages: string[]) {

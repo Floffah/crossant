@@ -1,22 +1,25 @@
-import Manager from "../Manager";
-import ManagersManager from "../ManagersManager";
-import Module from "./structures/Module";
+import { ApplicationCommandData, Interaction } from "discord.js";
+import Module from "managers/commands/structures/Module";
+import SlashCommand, {
+    SlashCommandType,
+} from "managers/commands/structures/SlashCommand";
+import Manager from "managers/Manager";
+import ManagersManager from "managers/ManagersManager";
+import UtilModule from "managers/commands/modules/Util";
 import BaseCommand, {
     CommandName,
     CommandType,
 } from "./structures/BaseCommand";
-import { Interaction } from "discord.js";
-import SlashCommand, { SlashCommandType } from "./structures/SlashCommand";
 import IncomingSlashCommand, {
     IncomingSlashCommandOptions,
-} from "./structures/IncomingSlashCommand";
+} from "managers/commands/structures/IncomingSlashCommand";
 
 export default class CommandsManager extends Manager {
     commands: Map<CommandName, BaseCommand> = new Map();
     aliases: Map<string, CommandName> = new Map();
     modules: Map<string, Module> = new Map();
 
-    initialModules: { new (): Module }[] = [];
+    initialModules: { new (): Module }[] = [UtilModule];
 
     constructor(m: ManagersManager) {
         super(m, "commands");
@@ -33,22 +36,53 @@ export default class CommandsManager extends Manager {
         this.managers.bot.client.on("interactionCreate", (i) =>
             this.interaction(i),
         );
+        this.managers.bot.client.on("ready", () => this.ready());
     }
 
     registerModule(m: Module) {
         m.managers = this.managers;
         this.modules.set(m.name, m);
-        m.load(); // send the load event to the module
+        this.managers.bot.logger.debug(`Registered module ${m.name}`);
+        if (m.load) m.load(); // send the load event to the module
     }
 
     registerCommand(m: Module, c: BaseCommand) {
         c.module = m;
         this.commands.set(c.realname, c);
         m.commands.push(c.name);
+        this.managers.bot.logger.debug(
+            `Registered command ${c.name} (${c.type})`,
+        );
         if (c.aliases && c.aliases.length > 0) {
             for (const alias of c.aliases) {
                 this.aliases.set(alias, c.realname);
             }
+        }
+    }
+
+    async ready() {
+        const commands: ApplicationCommandData[] = [];
+
+        for (const [, c] of this.commands.entries()) {
+            if (
+                c.type === CommandType.CHAT_INPUT &&
+                c instanceof SlashCommand &&
+                c.rawbuilder
+            ) {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                commands.push({ type: "CHAT_INPUT", ...c.rawbuilder.toJSON() });
+            } else
+                commands.push({
+                    type: c.type === CommandType.MESSAGE ? "MESSAGE" : "USER",
+                    name: c.name,
+                });
+        }
+
+        this.managers.bot.client.application?.commands.set(commands);
+
+        for (const m of this.modules.values()) {
+            m.ready();
         }
     }
 
@@ -64,9 +98,9 @@ export default class CommandsManager extends Manager {
                         this.managers.bot.debugmode
                             ? "development"
                             : "production"
-                    } instance of Crossant. If you think this is a mistake, DM Floffah#6791 "mr dev man shard ${this.managers.bot.client.shard?.ids.join(
+                    } instance of Crossant. If you think this is a mistake, DM Floffah#6791 "shard ${this.managers.bot.client.shard?.ids.join(
                         ",",
-                    )} hasn't caught up" (word for word :smile:)`,
+                    )} hasn't caught up"`,
                 );
 
             if (cmd.baseopts.deferred) {

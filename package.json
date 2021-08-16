@@ -3,10 +3,6 @@
     "version": "1.0.0",
     "license": "MIT",
     "private": true,
-    "engines": {
-        "node": ">=16.6.2",
-        "yarn": ">=3.0.0"
-    },
     "devDependencies": {
         "@floffah/build": "^1.0.0",
         "@prisma/client": "^2.29.1",

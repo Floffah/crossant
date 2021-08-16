@@ -1,8 +1,8 @@
-import Crossant from "../bot/Crossant";
-import Manager from "./Manager";
 import { EventEmitter } from "events";
 import TypedEventEmitter from "typed-emitter";
+import Crossant from "../bot/Crossant";
 import CommandsManager from "./commands/CommandsManager";
+import Manager from "./Manager";
 
 export interface ManagersManagerEvents {
     load: () => void;

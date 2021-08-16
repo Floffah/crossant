@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { resolve } from "path";
 import { parse, stringify } from "ini";
+import { resolve } from "path";
 import { defaultConfig } from "../util/config";
 
 export default async function initCommand() {

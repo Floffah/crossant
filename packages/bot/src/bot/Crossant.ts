@@ -1,12 +1,12 @@
-import { Client } from "discord.js";
-import { resolve } from "path";
-import ManagersManager from "../managers/ManagersManager";
-import { existsSync, readFileSync, writeFileSync } from "fs";
-import chalk from "chalk";
-import { Config } from "../util/config";
-import { parse, stringify } from "ini";
 // import { createLogger, format, Logger, transports } from "winston";
 import { PrismaClient } from "@prisma/client";
+import chalk from "chalk";
+import { Client } from "discord.js";
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import { parse, stringify } from "ini";
+import { resolve } from "path";
+import ManagersManager from "../managers/ManagersManager";
+import { Config } from "../util/config";
 import Logger from "../util/Logger";
 
 require("dotenv").config();
@@ -37,6 +37,7 @@ export default class Crossant {
         if (opts.debug) this.debugmode = true;
 
         this.logger = new Logger();
+        this.logger.debugEnabled = this.debugmode;
 
         // this.logger = createLogger({
         //     levels: {

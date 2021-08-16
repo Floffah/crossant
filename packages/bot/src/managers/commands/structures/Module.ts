@@ -2,17 +2,17 @@ import ManagersManager from "../../ManagersManager";
 import CommandsManager from "../CommandsManager";
 import BaseCommand from "./BaseCommand";
 
-export default class Module {
+export default abstract class Module {
     commands: string[] = [];
 
     name: string;
     managers: ManagersManager;
 
-    constructor(name: string) {
+    protected constructor(name: string) {
         this.name = name;
     }
 
-    registerCommand(c: BaseCommand) {
+    protected registerCommand(c: BaseCommand) {
         const cmds = this.managers.managers.get("commands") as
             | CommandsManager
             | undefined;
@@ -20,11 +20,9 @@ export default class Module {
         cmds.registerCommand(this, c);
     }
 
-    load() {
-        // load
-    }
+    abstract load?(): void | Promise<void>;
 
-    ready() {
-        // ready
+    ready(): void | Promise<void> {
+        // to make optional
     }
 }
