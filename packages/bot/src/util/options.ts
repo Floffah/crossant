@@ -1,5 +1,9 @@
 import {
-    ApplicationCommandOption,
+    APIApplicationCommandArgumentOptions,
+    APIApplicationCommandOption,
+    APIApplicationCommandSubCommandOptions,
+} from "discord-api-types/v9";
+import {
     ApplicationCommandOptionChoice,
     Client,
     CommandInteractionOption,
@@ -9,10 +13,17 @@ import {
     Snowflake,
     User,
 } from "discord.js";
+import { ApplicationCommandOptionType } from "src/util/djs/enums";
+
+export function optionKeyName(i: number) {
+    return Object.keys(ApplicationCommandOptionType)[
+        Object.values(ApplicationCommandOptionType).findIndex((v) => v === i)
+    ];
+}
 
 export function optionsToUsage(
     name: string,
-    opts: ApplicationCommandOption[],
+    opts: APIApplicationCommandOption[],
     prefix = "/",
     groups?: string[],
 ) {
@@ -24,10 +35,15 @@ export function optionsToUsage(
 
             for (const opt of opts) {
                 if (
-                    ["SUB_COMMAND", "SUB_COMMAND_GROUP"].includes(opt.type) &&
+                    [
+                        ApplicationCommandOptionType.Subcommand,
+                        ApplicationCommandOptionType.SubcommandGroup,
+                    ].includes(opt.type) &&
                     opt.name === group
                 ) {
-                    opts = opt.options as ApplicationCommandOption[];
+                    opts =
+                        (opt as APIApplicationCommandSubCommandOptions)
+                            .options ?? [];
                     break;
                 }
             }
@@ -37,20 +53,26 @@ export function optionsToUsage(
     for (const opt of opts) {
         let val = opt.name;
 
-        if (opt.type !== "STRING") {
+        if (opt.type !== ApplicationCommandOptionType.String) {
             let name = "";
 
-            if (opt.type === "INTEGER") name = "number";
-            else if (opt.type === "BOOLEAN") name = "yes/no";
-            else if (opt.type === "ROLE") name = "@role/id";
-            else if (opt.type === "USER") name = "@user/id";
-            else if (opt.type === "CHANNEL") name = "#channel/id";
-            else name = opt.type.toLowerCase().replace(/_/g, " ");
+            if (opt.type === ApplicationCommandOptionType.Integer)
+                name = "number";
+            else if (opt.type === ApplicationCommandOptionType.Boolean)
+                name = "yes/no";
+            else if (opt.type === ApplicationCommandOptionType.Role)
+                name = "@role/id";
+            else if (opt.type === ApplicationCommandOptionType.User)
+                name = "@user/id";
+            else if (opt.type === ApplicationCommandOptionType.Channel)
+                name = "#channel/id";
+            else
+                name = optionKeyName(opt.type).toLowerCase().replace(/_/g, " ");
 
             val += ` (${name})`;
         }
 
-        if (opt.type === "SUB_COMMAND") usage += "\n";
+        if (opt.type === ApplicationCommandOptionType.Subcommand) usage += "\n";
 
         if (opt.required) {
             usage += ` <${val}>`;
@@ -64,7 +86,7 @@ export function optionsToUsage(
 
 export async function parseToOptions(
     commandName: string,
-    options: ApplicationCommandOption[],
+    options: APIApplicationCommandOption[],
     content: string,
     client: Client,
     guild?: Guild,
@@ -81,7 +103,12 @@ export async function parseToOptions(
 
         for (const opt of options) {
             if (opt.required) argsNeeded++;
-            else if (["SUB_COMMAND", "SUB_COMMAND_GROUP"].includes(opt.type)) {
+            else if (
+                [
+                    ApplicationCommandOptionType.Subcommand,
+                    ApplicationCommandOptionType.SubcommandGroup,
+                ].includes(opt.type)
+            ) {
                 argsNeeded++;
                 currentLevelsGroups.push(opt.name);
             }
@@ -89,7 +116,7 @@ export async function parseToOptions(
     };
     calcNeeded();
 
-    if (!/^\s+$/.test(content) && options.length >= 1) {
+    if (content !== "" && !/^\s+$/.test(content) && options.length >= 1) {
         const grouppath: string[] = [];
 
         const args = content.split(" ");
@@ -141,15 +168,18 @@ export async function parseToOptions(
             ) {
                 grouppath.push(arg.toLowerCase());
                 options = (
-                    options.find(
+                    (options as APIApplicationCommandSubCommandOptions[]).find(
                         (o) => o.name === arg.toLowerCase(),
-                    ) as ApplicationCommandOption
-                ).options as ApplicationCommandOption[];
+                    ) as APIApplicationCommandSubCommandOptions
+                ).options as APIApplicationCommandOption[];
                 calcNeeded();
             } else if (options[optIndex]) {
                 const opt = options[optIndex];
 
-                if (/<@!?[0-9]+>/.test(arg) && opt.type === "USER") {
+                if (
+                    /<@!?[0-9]+>/.test(arg) &&
+                    opt.type === ApplicationCommandOptionType.User
+                ) {
                     const id = arg.replace(/(^<@!?|>$)/g, "");
 
                     finalOptions.push({
@@ -159,7 +189,10 @@ export async function parseToOptions(
                     });
 
                     optIndex++;
-                } else if (/<@&!?[0-9]+>/.test(arg) && opt.type === "ROLE") {
+                } else if (
+                    /<@&!?[0-9]+>/.test(arg) &&
+                    opt.type === ApplicationCommandOptionType.Role
+                ) {
                     const id = arg.replace(/(^<@&!?|>$)/g, "");
 
                     finalOptions.push({
@@ -169,7 +202,10 @@ export async function parseToOptions(
                     });
 
                     optIndex++;
-                } else if (/<#!?[0-9]+>/.test(arg) && opt.type === "CHANNEL") {
+                } else if (
+                    /<#!?[0-9]+>/.test(arg) &&
+                    opt.type === ApplicationCommandOptionType.Channel
+                ) {
                     const id = arg.replace(/(^<@&!?|>$)/g, "");
 
                     finalOptions.push({
@@ -181,9 +217,13 @@ export async function parseToOptions(
                     optIndex++;
                 } else if (
                     /[0-9]+/.test(arg) &&
-                    ["USER", "CHANNEL", "ROLE"].includes(opt.type)
+                    [
+                        ApplicationCommandOptionType.User,
+                        ApplicationCommandOptionType.Channel,
+                        ApplicationCommandOptionType.Role,
+                    ].includes(opt.type)
                 ) {
-                    if (opt.type === "USER") {
+                    if (opt.type === ApplicationCommandOptionType.User) {
                         finalOptions.push({
                             name: opt.name,
                             type: "USER",
@@ -191,7 +231,7 @@ export async function parseToOptions(
                         });
 
                         optIndex++;
-                    } else if (opt.type === "ROLE") {
+                    } else if (opt.type === ApplicationCommandOptionType.Role) {
                         finalOptions.push({
                             name: opt.name,
                             type: "ROLE",
@@ -199,7 +239,9 @@ export async function parseToOptions(
                         });
 
                         optIndex++;
-                    } else if (opt.type == "CHANNEL") {
+                    } else if (
+                        opt.type == ApplicationCommandOptionType.Channel
+                    ) {
                         finalOptions.push({
                             name: opt.name,
                             type: "ROLE",
@@ -208,9 +250,9 @@ export async function parseToOptions(
 
                         optIndex++;
                     } else {
-                        throw `Incorrect value type for ${
-                            opt.type
-                        }\n\n${optionsToUsage(
+                        throw `Incorrect value type for ${optionKeyName(
+                            opt.type,
+                        )}\n\n${optionsToUsage(
                             commandName,
                             options,
                             undefined,
@@ -219,7 +261,7 @@ export async function parseToOptions(
                     }
                 } else if (
                     /[0-9]+(\.[0-9]+)?/.test(arg) &&
-                    opt.type === "INTEGER"
+                    opt.type === ApplicationCommandOptionType.Integer
                 ) {
                     finalOptions.push({
                         name: opt.name,
@@ -228,7 +270,7 @@ export async function parseToOptions(
                     });
                     optIndex++;
                 } else if (/^\S+/.test(arg)) {
-                    if (opt.type === "STRING") {
+                    if (opt.type === ApplicationCommandOptionType.String) {
                         if (
                             optIndex + 1 >= options.length &&
                             argIndex + 1 < args.length
@@ -241,8 +283,10 @@ export async function parseToOptions(
                             currentString = arg.replace(/^"/, "");
                             currentName = opt.name;
                         } else {
-                            if (opt.choices) {
-                                const raw = opt.choices.map((c) =>
+                            const o =
+                                opt as APIApplicationCommandArgumentOptions;
+                            if (o.choices) {
+                                const raw = o.choices.map((c) =>
                                     c.name.toLowerCase(),
                                 );
                                 if (!raw.includes(arg.toLowerCase()))
@@ -250,7 +294,7 @@ export async function parseToOptions(
                                         ",",
                                     )}`;
                                 else {
-                                    const choice = opt.choices.find(
+                                    const choice = o.choices.find(
                                         (c) =>
                                             c.name.toLowerCase() ===
                                             arg.toLowerCase(),
@@ -271,7 +315,9 @@ export async function parseToOptions(
                             }
                             optIndex++;
                         }
-                    } else if (opt.type === "BOOLEAN") {
+                    } else if (
+                        opt.type === ApplicationCommandOptionType.Boolean
+                    ) {
                         finalOptions.push({
                             name: opt.name,
                             type: "STRING",
@@ -282,9 +328,9 @@ export async function parseToOptions(
                         });
                         optIndex++;
                     } else {
-                        throw `Incorrect value type for ${
-                            opt.type
-                        }\n\n${optionsToUsage(
+                        throw `Incorrect value type for ${optionKeyName(
+                            opt.type,
+                        )}\n\n${optionsToUsage(
                             commandName,
                             options,
                             undefined,
@@ -292,9 +338,9 @@ export async function parseToOptions(
                         )}`;
                     }
                 } else {
-                    throw `Incorrect value type for ${
-                        opt.type
-                    }\n\n${optionsToUsage(
+                    throw `Incorrect value type for ${optionKeyName(
+                        opt.type,
+                    )}\n\n${optionsToUsage(
                         commandName,
                         options,
                         undefined,

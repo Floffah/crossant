@@ -22,6 +22,8 @@ model Guild {
   id String @id
 
   // -- SETTINGS --
+  // util
+  prefix          String       @default("!")
   // channel list
   channelListMode ListMode
   channelList     String[]

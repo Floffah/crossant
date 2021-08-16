@@ -12,7 +12,7 @@ import IncomingBaseCommand from "./IncomingBaseCommand";
 import SlashCommand, { SlashCommandType } from "./SlashCommand";
 
 export interface IncomingSlashCommandOptions<
-    Type extends SlashCommandType = any,
+    Type extends SlashCommandType = SlashCommandType,
 > {
     managers: ManagersManager;
     command: SlashCommand;
@@ -33,7 +33,7 @@ export interface IncomingSlashCommandOptions<
 }
 
 export default class IncomingSlashCommand<
-    Type extends SlashCommandType = any,
+    Type extends SlashCommandType = SlashCommandType,
 > extends IncomingBaseCommand<CommandType.CHAT_INPUT> {
     interaction: Type extends SlashCommandType.SIMULATED
         ? undefined
@@ -55,6 +55,7 @@ export default class IncomingSlashCommand<
         this.command = opts.command;
 
         this.interaction = opts.interaction;
+
         this.lastSimulatedMessage = opts.deferredMessage;
         this.previouslySimulated = !!opts.deferredMessage;
 
@@ -92,6 +93,7 @@ export default class IncomingSlashCommand<
             this.commandType = SlashCommandType.SIMULATED as Type;
 
             if (!opts.originalMessage) throw new Error("No message passed");
+            this.message = opts.originalMessage;
 
             if (opts.originalMessage.guild && opts.originalMessage.member) {
                 this.hasGuild = true;

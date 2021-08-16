@@ -1,3 +1,4 @@
+import { If } from "src/util/types";
 import IncomingBaseCommand from "./IncomingBaseCommand";
 import Module from "./Module";
 
@@ -21,14 +22,14 @@ export enum CommandType {
 
 export type CommandName = `${CommandType}@${string}`;
 
-export default abstract class BaseCommand<Aliasable extends boolean = any> {
+export default abstract class BaseCommand<Aliasable extends boolean = boolean> {
     type: CommandType;
     name: string;
     realname: CommandName;
     baseopts: BaseCommandOptions;
 
     module: Module;
-    aliases: Aliasable extends true ? string[] : undefined;
+    aliases: If<Aliasable, string[]>;
 
     protected constructor(
         type: CommandType,

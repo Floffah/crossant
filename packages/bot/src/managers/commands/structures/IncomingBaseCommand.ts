@@ -13,37 +13,37 @@ import {
     ThreadChannel,
     User,
 } from "discord.js";
+import { If } from "src/util/types";
 import ManagersManager from "../../ManagersManager";
 import BaseCommand, { CommandType } from "./BaseCommand";
 import SlashCommand from "./SlashCommand";
 
 export default class IncomingBaseCommand<
-    Type extends CommandType = any,
-    IsInteraction extends boolean = any,
-    IsGuild extends boolean = any,
+    Type extends CommandType = CommandType,
+    IsInteraction extends boolean = boolean,
+    IsGuild extends boolean = boolean,
 > {
     managers: ManagersManager;
 
     interaction: Type extends CommandType.CHAT_INPUT
-        ? IsInteraction extends true
-            ? Interaction
-            : undefined
+        ? If<IsInteraction, Interaction>
         : Interaction;
 
-    guild: IsGuild extends true ? Guild : undefined;
-    member: IsGuild extends true ? GuildMember : undefined;
+    guild: If<IsGuild, Guild>;
+    member: If<IsGuild, GuildMember>;
 
     user: User;
 
-    channel: IsGuild extends true
-        ?
-              | TextChannel
-              | CategoryChannel
-              | NewsChannel
-              | StoreChannel
-              | StageChannel
-              | ThreadChannel
-        : DMChannel | PartialDMChannel;
+    channel: If<
+        IsGuild,
+        | TextChannel
+        | CategoryChannel
+        | NewsChannel
+        | StoreChannel
+        | StageChannel
+        | ThreadChannel,
+        DMChannel | PartialDMChannel
+    >;
     // message: Type extends CommandType.USER ? undefined : Message;
 
     options: CommandInteractionOptionResolver;

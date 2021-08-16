@@ -1,5 +1,7 @@
 import { Routes } from "discord-api-types/v9";
-import { ApplicationCommandData, Interaction } from "discord.js";
+import { ApplicationCommandData, Interaction, Message } from "discord.js";
+import { ManagerNames } from "src/managers/commands/managers";
+import BoardsModule from "src/managers/commands/modules/Boards";
 import UtilModule from "src/managers/commands/modules/Util";
 import IncomingSlashCommand, {
     IncomingSlashCommandOptions,
@@ -12,6 +14,7 @@ import Manager from "src/managers/Manager";
 import ManagersManager from "src/managers/ManagersManager";
 import { ApplicationCommandTypes } from "src/util/djs/enums";
 import Logger from "src/util/Logger";
+import { parseToOptions } from "src/util/options";
 import BaseCommand, {
     CommandName,
     CommandType,
@@ -22,10 +25,10 @@ export default class CommandsManager extends Manager {
     aliases: Map<string, CommandName> = new Map();
     modules: Map<string, Module> = new Map();
 
-    initialModules: { new (): Module }[] = [UtilModule];
+    initialModules: { new (): Module }[] = [BoardsModule, UtilModule];
 
     constructor(m: ManagersManager) {
-        super(m, "commands");
+        super(m, ManagerNames.CommandsManager);
 
         this.managers.on("load", () => this.load());
     }
@@ -36,10 +39,11 @@ export default class CommandsManager extends Manager {
             await this.registerModule(m);
         }
 
+        this.managers.bot.client.on("ready", () => this.ready());
         this.managers.bot.client.on("interactionCreate", (i) =>
             this.interaction(i),
         );
-        this.managers.bot.client.on("ready", () => this.ready());
+        this.managers.bot.client.on("messageCreate", (m) => this.message(m));
     }
 
     async registerModule(m: Module) {
@@ -122,6 +126,73 @@ export default class CommandsManager extends Manager {
         Logger.inst.info("Bot ready");
     }
 
+    async message(msg: Message) {
+        if (msg.author.bot) return;
+
+        const cache = this.managers.get(ManagerNames.CacheManager);
+        if (!cache) return;
+
+        const prefix = msg.guild
+            ? await cache.getOrFetchGuildPrefix(msg.guild.id)
+            : this.managers.bot.config.bot.defaultPrefix;
+
+        if (msg.content.startsWith(prefix)) {
+            let content = msg.content;
+
+            content = content.replace(new RegExp(`^${prefix}`), "");
+
+            const initialMatches = content.match(/^[A-z0-9]+/);
+            if (!initialMatches || initialMatches.length !== 1) return;
+
+            let cmd = initialMatches[0].toLowerCase();
+
+            if (this.aliases.has(cmd)) cmd = this.aliases.get(cmd) as string;
+
+            content = content.replace(new RegExp(`^${cmd} ?`), "");
+
+            if (this.commands.has(`slash@${cmd}`)) {
+                const command = this.commands.get(
+                    `slash@${cmd}`,
+                ) as SlashCommand;
+
+                let deferredMessage: Message | undefined = undefined;
+
+                if (command.opts.deferred)
+                    deferredMessage = await msg.reply("Processing...");
+
+                try {
+                    const options = await parseToOptions(
+                        cmd,
+                        (command.rawbuilder
+                            ? command.rawbuilder.toJSON().options
+                            : []) ?? [],
+                        content,
+                        this.managers.bot.client,
+                        msg.guild ?? undefined,
+                    );
+                    const inc = new IncomingSlashCommand({
+                        managers: this.managers,
+                        command: command,
+                        interaction: undefined,
+                        deferredMessage,
+                        originalMessage: msg,
+                        simulatedOptions: options,
+                    });
+                    await command.incoming(inc);
+                } catch (e) {
+                    if (typeof e === "string") {
+                        const emsg = `An error occured\n\n\`\`\`\n${e}\n\`\`\``;
+                        await msg.reply(emsg);
+                    } else {
+                        const emsg = `An error occured\n\n\`\`\`\n${e.message}\n\`\`\``;
+                        await msg.reply(emsg);
+                    }
+                    console.error(e);
+                }
+            }
+        }
+    }
+
     async interaction(i: Interaction) {
         if (i.isCommand()) {
             const cmd = this.commands.get(
@@ -153,15 +224,16 @@ export default class CommandsManager extends Manager {
                 } as IncomingSlashCommandOptions<SlashCommandType.INTERACTION>);
                 await cmd.incoming(incoming);
             } catch (e) {
-                if ("message" in e) {
-                    const msg = `An error occured\n\n\`\`\`\n${e.message}\n\`\`\``;
-                    if (i.replied) await i.editReply(msg);
-                    else await i.reply(msg);
-                } else {
+                if (typeof e === "string") {
                     const msg = `An error occured\n\n\`\`\`\n${e}\n\`\`\``;
                     if (i.replied) await i.editReply(msg);
                     else await i.reply(msg);
+                } else {
+                    const msg = `An error occured\n\n\`\`\`\n${e.message}\n\`\`\``;
+                    if (i.replied) await i.editReply(msg);
+                    else await i.reply(msg);
                 }
+                console.error(e);
             }
         }
     }

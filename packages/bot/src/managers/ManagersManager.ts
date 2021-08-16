@@ -1,4 +1,6 @@
 import { EventEmitter } from "events";
+import CacheManager from "src/managers/commands/CacheManager";
+import { ManagerNames, ManagerTypes } from "src/managers/commands/managers";
 import TypedEventEmitter from "typed-emitter";
 import Crossant from "../bot/Crossant";
 import CommandsManager from "./commands/CommandsManager";
@@ -15,7 +17,7 @@ const TypedEmitter = EventEmitter as {
 class ManagersManager extends TypedEmitter {
     bot: Crossant;
 
-    managers: Map<string, Manager> = new Map();
+    managers: Map<ManagerNames, Manager> = new Map();
 
     constructor(bot: Crossant) {
         super();
@@ -25,6 +27,7 @@ class ManagersManager extends TypedEmitter {
     async startManagers() {
         const raw: { new (manager: ManagersManager): Manager }[] = [
             CommandsManager,
+            CacheManager,
         ];
 
         for (const manager of raw) {
@@ -35,6 +38,10 @@ class ManagersManager extends TypedEmitter {
         }
 
         this.emit("load");
+    }
+
+    get<Name extends ManagerNames>(name: Name): ManagerTypes[Name] | undefined {
+        return this.managers.get(name) as ManagerTypes[Name] | undefined;
     }
 }
 

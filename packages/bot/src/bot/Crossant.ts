@@ -1,3 +1,4 @@
+import "source-map-support/register";
 import { REST } from "@discordjs/rest";
 import { PrismaClient } from "@prisma/client";
 import chalk from "chalk";
@@ -38,73 +39,82 @@ export default class Crossant {
     }
 
     async init(opts: { debug?: boolean }) {
-        const shardtime = process.argv.find((a) =>
-            a.toLowerCase().startsWith("--shard_time="),
-        );
-        if (shardtime)
-            this.shardmanstarttime = parseInt(
-                shardtime.toLowerCase().replace("--shard_time=", ""),
+        try {
+            const shardtime = process.argv.find((a) =>
+                a.toLowerCase().startsWith("--shard_time="),
             );
-        else if ("SHARD_TIME" in process.env && process.env.SHARD_TIME)
-            this.shardmanstarttime = parseInt(process.env.SHARD_TIME);
+            if (shardtime)
+                this.shardmanstarttime = parseInt(
+                    shardtime.toLowerCase().replace("--shard_time=", ""),
+                );
+            else if ("SHARD_TIME" in process.env && process.env.SHARD_TIME)
+                this.shardmanstarttime = parseInt(process.env.SHARD_TIME);
 
-        if (opts.debug) this.debugmode = true;
+            if (opts.debug) this.debugmode = true;
 
-        this.logger = new Logger();
-        this.logger.debugEnabled = this.debugmode;
+            this.logger = new Logger();
+            this.logger.debugEnabled = this.debugmode;
 
-        // this.logger = createLogger({
-        //     levels: {
-        //         error: 0,
-        //         warn: 1,
-        //         info: 2,
-        //         debug: 3,
-        //     },
-        //     level: this.debugmode ? "debug" : "info",
-        //     format: format.json(),
-        //     transports: [
-        //         new transports.Console({
-        //             format: format.combine(format.colorize(), format.simple()),
-        //         }),
-        //     ],
-        // });
+            // this.logger = createLogger({
+            //     levels: {
+            //         error: 0,
+            //         warn: 1,
+            //         info: 2,
+            //         debug: 3,
+            //     },
+            //     level: this.debugmode ? "debug" : "info",
+            //     format: format.json(),
+            //     transports: [
+            //         new transports.Console({
+            //             format: format.combine(format.colorize(), format.simple()),
+            //         }),
+            //     ],
+            // });
 
-        this.logger.debug("In debug mode");
+            this.logger.debug("In debug mode");
 
-        if (!existsSync(this.datadir)) {
-            console.error(
-                chalk`{red Could not find crossant's data dir (.crossant). Please check your working directory}`,
+            if (!existsSync(this.datadir)) {
+                console.error(
+                    chalk`{red Could not find crossant's data dir (.crossant). Please check your working directory}`,
+                );
+                process.exit(1);
+            }
+
+            this.readConfig();
+
+            this.client = new Client({
+                intents: ["DIRECT_MESSAGES", "GUILD_MESSAGES", "GUILDS"],
+            });
+
+            if (this.client.shard) {
+                this.logger.prefix = this.client.shard.ids.join(",");
+                this.logger.info(
+                    `Sharding enabled. ids: ${this.client.shard.ids.join(
+                        ", ",
+                    )}`,
+                );
+            } else this.logger.info("Sharding disabled");
+
+            this.db = new PrismaClient({
+                log: this.debugmode
+                    ? ["warn", "error", "info", "query"]
+                    : ["warn", "error"],
+            });
+
+            this.managers = new ManagersManager(this);
+            await this.managers.startManagers();
+
+            this.writeConfig();
+
+            this.client.on("ready", () => this.ready());
+            this.rest = new REST({ version: "9" }).setToken(
+                this.config.bot.token,
             );
-            process.exit(1);
+            await this.client.login(this.config.bot.token);
+        } catch (e) {
+            console.error(e);
+            process.exit(0);
         }
-
-        this.readConfig();
-
-        this.client = new Client({
-            intents: ["DIRECT_MESSAGES", "GUILD_MESSAGES", "GUILDS"],
-        });
-
-        if (this.client.shard) {
-            this.logger.prefix = this.client.shard.ids.join(",");
-            this.logger.info(
-                `Sharding enabled. ids: ${this.client.shard.ids.join(", ")}`,
-            );
-        } else this.logger.info("Sharding disabled");
-
-        this.db = new PrismaClient({
-            log: this.debugmode
-                ? ["warn", "error", "info", "query"]
-                : ["warn", "error"],
-        });
-
-        this.managers = new ManagersManager(this);
-        await this.managers.startManagers();
-
-        this.writeConfig();
-
-        this.client.on("ready", () => this.ready());
-        this.rest = new REST({ version: "9" }).setToken(this.config.bot.token);
-        await this.client.login(this.config.bot.token);
     }
 
     async ready() {
