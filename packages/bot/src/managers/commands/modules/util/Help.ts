@@ -1,7 +1,13 @@
 import { stripIndents } from "common-tags";
+import {
+    APIApplicationCommandOption,
+    APIApplicationCommandSubCommandOptions,
+} from "discord-api-types/payloads/v9/_interactions/slashCommands";
 import { ManagerNames } from "src/managers/commands/managers";
+import { CommandName } from "src/managers/commands/structures/BaseCommand";
 import { ApplicationCommandOptionType } from "src/util/djs/enums";
 import { defaultEmbed } from "src/util/embeds";
+import { optionsToUsage } from "src/util/options";
 import IncomingSlashCommand from "../../structures/IncomingSlashCommand";
 import SlashCommand from "../../structures/SlashCommand";
 
@@ -30,7 +36,60 @@ export default class HelpCommand extends SlashCommand {
         const prefix = await cache.getOrFetchGuildPrefix(i.guild);
 
         if (i.options.get("command")) {
-            //
+            const commandopt = i.options.getString("command", true);
+            const command = commandopt.toLowerCase().split(".")[0];
+            const groups = commandopt.toLowerCase().split(".");
+            groups.shift();
+            const cmd = (
+                cmds.aliases.has(command)
+                    ? cmds.commands.get(
+                          cmds.aliases.get(command) as CommandName,
+                      )
+                    : cmds.commands.get(`slash@${command}`)
+            ) as SlashCommand | undefined;
+
+            if (!cmd) throw `No such command ${command}`;
+
+            let options: APIApplicationCommandOption[] | undefined =
+                cmd.options?.map((t) => t.toJSON());
+            let lastGroup: string | undefined;
+
+            for (const g of groups) {
+                if (!options || (lastGroup !== undefined && lastGroup !== g))
+                    throw `No such group ${g}`;
+
+                for (const opt of options) {
+                    if (
+                        opt.name === g &&
+                        (opt.type === ApplicationCommandOptionType.Subcommand ||
+                            opt.type ===
+                                ApplicationCommandOptionType.SubcommandGroup)
+                    ) {
+                        options = (
+                            opt as APIApplicationCommandSubCommandOptions
+                        ).options;
+                        lastGroup = opt.name;
+                    }
+                }
+            }
+
+            if (!options) options = cmd.options?.map((o) => o.toJSON()) ?? [];
+
+            await i.reply({
+                embeds: [
+                    defaultEmbed()
+                        .setTitle(
+                            `"${cmd.name}${
+                                groups.length > 0 ? groups.join(" ") : ""
+                            }" Help`,
+                        )
+                        .setDescription(cmd.baseopts.description)
+                        .addField(
+                            "Usage",
+                            optionsToUsage(cmd.name, options, "/", groups),
+                        ),
+                ],
+            });
         } else {
             const embed = defaultEmbed().setTitle("Help")
                 .setDescription(stripIndents`

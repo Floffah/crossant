@@ -36,7 +36,10 @@ export default class CacheManager extends Manager {
             },
         });
 
-        if (!dbguild) return this.managers.bot.config.bot.defaultPrefix;
+        if (!dbguild) {
+            this.prefixes[g.id] = Date.now();
+            return this.managers.bot.config.bot.defaultPrefix;
+        }
 
         this.prefixes[g.id] = dbguild.prefix;
         return dbguild.prefix;
