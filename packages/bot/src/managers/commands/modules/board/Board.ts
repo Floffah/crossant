@@ -59,6 +59,8 @@ export default class BoardCommand extends SlashCommand {
     async incoming(i: IncomingSlashCommand) {
         const sub = i.options.getSubcommand(true);
 
+        console.log(sub);
+
         if (sub === "create") await this.create(i);
         else if (sub === "delete") await this.delete(i);
         else if (sub === "list") await this.list(i);

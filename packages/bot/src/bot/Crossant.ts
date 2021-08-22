@@ -1,4 +1,3 @@
-import "source-map-support/register";
 import { REST } from "@discordjs/rest";
 import { PrismaClient } from "@prisma/client";
 import chalk from "chalk";
@@ -6,6 +5,7 @@ import { Client } from "discord.js";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { parse, stringify } from "ini";
 import { resolve } from "path";
+import "source-map-support/register";
 import ManagersManager from "../managers/ManagersManager";
 import { Config } from "../util/config";
 import Logger from "../util/Logger";
@@ -83,7 +83,21 @@ export default class Crossant {
             this.readConfig();
 
             this.client = new Client({
-                intents: ["DIRECT_MESSAGES", "GUILD_MESSAGES", "GUILDS"],
+                intents: [
+                    "GUILDS",
+                    "GUILD_MESSAGES",
+                    "GUILD_MEMBERS",
+                    "GUILD_EMOJIS_AND_STICKERS",
+                    "GUILD_MESSAGE_REACTIONS",
+                    "DIRECT_MESSAGES",
+                ],
+                partials: [
+                    "CHANNEL",
+                    "GUILD_MEMBER",
+                    "MESSAGE",
+                    "REACTION",
+                    "USER",
+                ],
             });
 
             if (this.client.shard) {
