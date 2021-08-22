@@ -110,7 +110,16 @@ export default class BoardCommand extends SlashCommand {
             data: {
                 channelId: channel.id,
                 emoji: reaction.emoji.identifier,
-                guildId: i.guild.id,
+                guild: {
+                    connectOrCreate: {
+                        where: {
+                            id: i.guild.id,
+                        },
+                        create: {
+                            id: i.guild.id,
+                        },
+                    },
+                },
             },
         });
         await reaction.remove();
