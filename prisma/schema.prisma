@@ -5,7 +5,7 @@ datasource db {
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["selectRelationCount"]
+  previewFeatures = ["referentialActions"]
 }
 
 // users
@@ -21,14 +21,14 @@ model User {
 }
 
 model PingMessage {
-    user User @relation(fields: [userId], references: [id])
-    userId String
-    guild Guild @relation(fields: [guildId], references: [id])
-    guildId String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  guildId String
 
-    message String
+  message String
 
-    @@id([userId, guildId])
+  @@id([userId, guildId])
 }
 
 // guilds
@@ -39,7 +39,7 @@ model Guild {
   // util
   prefix          String       @default("!")
   // channel list
-  channelListMode ListMode @default(Blacklist)
+  channelListMode ListMode     @default(Blacklist)
   channelList     String[]
   // guild board
   boards          GuildBoard[]
@@ -51,7 +51,7 @@ model Guild {
 
 model GuildBoard {
   id      Int    @id @default(autoincrement())
-  guild   Guild  @relation(fields: [guildId], references: [id])
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
   guildId String
 
   channelId String
@@ -66,7 +66,7 @@ model GuildBoardMessage {
   reactedChannelId String
   channelId        String
 
-  board   GuildBoard @relation(fields: [boardId], references: [id])
+  board   GuildBoard @relation(fields: [boardId], references: [id], onDelete: Cascade)
   boardId Int
 
   @@id([reactedMessageId, reactedChannelId])
