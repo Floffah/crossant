@@ -19,7 +19,7 @@ export default class PingMessageCommand extends SlashCommand {
                                 o
                                     .setName("message")
                                     .setDescription(
-                                        "The message to set. Is prefixed with 'Username is...'",
+                                        "The message to set. Is prefixed with '@member is...'",
                                     )
                                     .setRequired(true),
                             ),
@@ -47,7 +47,7 @@ export default class PingMessageCommand extends SlashCommand {
     async setCmd(i: IncomingSlashCommand) {
         if (!i.guild) throw "Must be in a guild";
 
-        const message = `${i.user.username} is ${i.options.getString(
+        const message = `<@${i.user.id}> is ${i.options.getString(
             "message",
             true,
         )}`;
