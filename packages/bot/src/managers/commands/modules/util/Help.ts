@@ -80,7 +80,7 @@ export default class HelpCommand extends SlashCommand {
                     defaultEmbed()
                         .setTitle(
                             `"${cmd.name}${
-                                groups.length > 0 ? groups.join(" ") : ""
+                                groups.length > 0 ? " " + groups.join(" ") : ""
                             }" Help`,
                         )
                         .setDescription(cmd.baseopts.description)

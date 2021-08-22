@@ -1,5 +1,5 @@
+import { ManagerNames } from "src/managers/commands/managers";
 import ManagersManager from "../../ManagersManager";
-import CommandsManager from "../CommandsManager";
 import BaseCommand from "./BaseCommand";
 
 export default abstract class Module {
@@ -12,12 +12,12 @@ export default abstract class Module {
         this.name = name;
     }
 
-    protected registerCommand(c: BaseCommand) {
-        const cmds = this.managers.managers.get("commands") as
-            | CommandsManager
-            | undefined;
+    protected registerCommand(...commands: BaseCommand[]) {
+        const cmds = this.managers.get(ManagerNames.CommandsManager);
         if (!cmds) throw new Error("No commands manager");
-        cmds.registerCommand(this, c);
+        for (const c of commands) {
+            cmds.registerCommand(this, c);
+        }
     }
 
     abstract load?(): void | Promise<void>;

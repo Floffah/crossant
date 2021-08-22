@@ -15,6 +15,20 @@ model User {
 
   // opted in to
   optWordCount Boolean @default(false)
+
+  // settings
+  pingMessages PingMessage[]
+}
+
+model PingMessage {
+    user User @relation(fields: [userId], references: [id])
+    userId String
+    guild Guild @relation(fields: [guildId], references: [id])
+    guildId String
+
+    message String
+
+    @@id([userId, guildId])
 }
 
 // guilds
@@ -25,10 +39,14 @@ model Guild {
   // util
   prefix          String       @default("!")
   // channel list
-  channelListMode ListMode
+  channelListMode ListMode @default(Blacklist)
   channelList     String[]
   // guild board
   boards          GuildBoard[]
+
+  // --
+  // references
+  pingMessages PingMessage[]
 }
 
 model GuildBoard {
