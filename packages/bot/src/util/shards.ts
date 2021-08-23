@@ -1,10 +1,11 @@
 import chalk from "chalk";
-import { ShardingManager } from "discord.js";
+import { MessageEmbed, ShardingManager, TextChannel } from "discord.js";
 import execa from "execa";
 import { existsSync, readFileSync } from "fs";
 import { parse } from "ini";
 import { resolve } from "path";
 import pluralize from "pluralize";
+import { defaultEmbed } from "src/util/embeds";
 import { ShardMessage } from "src/util/shardmessages";
 
 const keypress = require("keypress");
@@ -31,6 +32,28 @@ export async function startShards() {
         respawn: true,
     });
 
+    const sendRespawn = (id: number, did = false, problem = false) =>
+        shards.broadcastEval(
+            async (c, context) => {
+                const channel = c.channels.resolve("879415229375717406") as
+                    | TextChannel
+                    | undefined;
+                if (channel)
+                    await channel.send({
+                        embeds: [context.embed as MessageEmbed],
+                    });
+            },
+            {
+                context: {
+                    embed: defaultEmbed().setTitle(
+                        `Shard ${id} ${problem ? "had a problem while " : ""}${
+                            did && !problem ? "respawned" : "respawning"
+                        }`,
+                    ),
+                },
+            },
+        );
+
     shards.on("shardCreate", (shard) => {
         log(`Shard ${shard.id} created`);
         shard.on("message", async (message: ShardMessage) => {
@@ -43,12 +66,15 @@ export async function startShards() {
                         if (message.data.ids.includes(s.id)) {
                             log(`Respawning shard ${s.id}`);
                             try {
+                                await sendRespawn(s.id);
                                 await s.respawn();
+                                await sendRespawn(s.id, true);
                             } catch (e) {
                                 log(
                                     `Shard ${s.id} failed to respawn. ${e.message}`,
                                     true,
                                 );
+                                await sendRespawn(s.id, true, true);
                             }
                         }
                     }
@@ -65,11 +91,14 @@ export async function startShards() {
         for (const s of shards.shards.values()) {
             log(`Respawning shard ${s.id}`);
             try {
+                await sendRespawn(s.id);
                 await s.respawn();
                 which.push(s.id);
+                await sendRespawn(s.id, true);
             } catch (e) {
                 log(`Shard ${s.id} failed to respawn. ${e.message}`, true);
                 faults.push(s.id);
+                await sendRespawn(s.id, true, true);
             }
         }
 
