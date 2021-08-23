@@ -133,5 +133,29 @@ export default class Crossant {
 
     async ready() {
         this.readyTime = Date.now();
+
+        await this.updatePresence();
+
+        setInterval(() => this.updatePresence());
+    }
+
+    async updatePresence() {
+        if (!this.client.shard) return;
+
+        const membersArray = await this.client.shard.broadcastEval(
+            async (c) => c.users.cache.size,
+        );
+        const total = membersArray.reduce((a, b) => a + b, 0);
+
+        this.client.user?.setPresence({
+            status: "online",
+            shardId: this.client.shard.ids,
+            activities: [
+                {
+                    type: "WATCHING",
+                    name: `${total} customers`,
+                },
+            ],
+        });
     }
 }
