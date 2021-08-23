@@ -69,7 +69,7 @@ export async function startShards() {
                         if (message.data.ids.includes(s.id)) {
                             log(`Respawning shard ${s.id}`);
                             try {
-                                await sendRespawn(s.id);
+                                // await sendRespawn(s.id);
                                 await s.respawn();
                                 // await sendRespawn(s.id, true);
                             } catch (e) {
@@ -94,7 +94,7 @@ export async function startShards() {
         for (const s of shards.shards.values()) {
             log(`Respawning shard ${s.id}`);
             try {
-                await sendRespawn(s.id);
+                // await sendRespawn(s.id);
                 await s.respawn();
                 which.push(s.id);
                 // await sendRespawn(s.id, true);
