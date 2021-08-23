@@ -133,9 +133,9 @@ export default class Crossant {
     async ready() {
         this.readyTime = Date.now();
 
-        await this.updatePresence();
+        // await this.updatePresence();
 
-        setInterval(() => this.updatePresence(), 1000 * 60 * 5);
+        // setInterval(() => this.updatePresence(), 1000 * 60 * 5);
     }
 
     async updatePresence() {
@@ -143,9 +143,7 @@ export default class Crossant {
 
         const membersArray = await this.client.shard.broadcastEval(
             async (c) => {
-                const guilds = await c.guilds.fetch({
-                    limit: 2500,
-                });
+                const guilds = await c.guilds.fetch();
 
                 const counted: Snowflake[] = [];
                 let total = 0;
