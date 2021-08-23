@@ -5,6 +5,7 @@ import { existsSync, readFileSync } from "fs";
 import { parse } from "ini";
 import { resolve } from "path";
 import pluralize from "pluralize";
+import { ShardMessage } from "src/util/shardmessages";
 
 const keypress = require("keypress");
 
@@ -32,6 +33,11 @@ export async function startShards() {
 
     shards.on("shardCreate", (shard) => {
         log(`Shard ${shard.id} created`);
+        shard.on("message", async (message: ShardMessage) => {
+            if (message.type === "check") {
+                await checkForShardUpdates();
+            }
+        });
     });
 
     async function respawnShards() {

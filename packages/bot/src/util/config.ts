@@ -3,6 +3,7 @@ export const defaultConfig = {
         token: "token here",
         defaultPrefix: "!",
         supportGuild: "872068506886217790",
+        owners: ["221524691079266314"],
     },
 };
 

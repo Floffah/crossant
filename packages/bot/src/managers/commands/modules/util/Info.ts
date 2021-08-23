@@ -22,7 +22,7 @@ export default class InfoCommand extends SlashCommand {
                     ", ",
                 )}
                 **Shard process uptime:** ${prettyMilliseconds(
-                    process.uptime(),
+                    process.uptime() * 1000,
                 )}
                 **Shard bot uptime:** ${prettyMilliseconds(
                     Date.now() - this.module.managers.bot.readyTime,
@@ -36,7 +36,7 @@ export default class InfoCommand extends SlashCommand {
                         : "No time data was passed to current worker"
                 }
             `,
-                        true,
+                        false,
                     )
                     .addField(
                         "Author",
