@@ -2,6 +2,7 @@ import { Routes } from "discord-api-types/v9";
 import { ApplicationCommandData, Interaction, Message } from "discord.js";
 import { ManagerNames } from "src/managers/commands/managers";
 import BoardsModule from "src/managers/commands/modules/Boards";
+import DevModule from "src/managers/commands/modules/Dev";
 import UtilModule from "src/managers/commands/modules/Util";
 import IncomingSlashCommand, {
     IncomingSlashCommandOptions,
@@ -25,7 +26,11 @@ export default class CommandsManager extends Manager {
     aliases: Map<string, CommandName> = new Map();
     modules: Map<string, Module> = new Map();
 
-    initialModules: { new (): Module }[] = [BoardsModule, UtilModule];
+    initialModules: { new (): Module }[] = [
+        BoardsModule,
+        UtilModule,
+        DevModule,
+    ];
 
     constructor(m: ManagersManager) {
         super(m, ManagerNames.CommandsManager);
