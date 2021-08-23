@@ -134,7 +134,6 @@ export default class Crossant {
         this.readyTime = Date.now();
 
         // await this.updatePresence();
-
         // setInterval(() => this.updatePresence(), 1000 * 60 * 5);
     }
 
