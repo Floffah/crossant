@@ -1,7 +1,7 @@
 import { REST } from "@discordjs/rest";
 import { PrismaClient } from "@prisma/client";
 import chalk from "chalk";
-import { Client } from "discord.js";
+import { Client, Snowflake } from "discord.js";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { parse, stringify } from "ini";
 import { resolve } from "path";
@@ -143,7 +143,28 @@ export default class Crossant {
 
         const membersArray = await this.client.shard.broadcastEval(
             async (c) => {
-                return c.users.cache.size;
+                const guilds = await c.guilds.fetch({
+                    limit: 2500,
+                });
+
+                const counted: Snowflake[] = [];
+                let total = 0;
+
+                for (const g of guilds.values()) {
+                    let guild = this.client.guilds.resolve(g.id);
+                    if (!guild) guild = await this.client.guilds.fetch(g.id);
+
+                    const members = await guild.members.fetch();
+
+                    for (const member of members.values()) {
+                        if (!counted.includes(member.id)) {
+                            counted.push(member.id);
+                            total += 1;
+                        }
+                    }
+                }
+
+                return total;
             },
         );
         let total = 0;
