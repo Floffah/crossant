@@ -127,7 +127,6 @@ export default class Crossant {
             await this.client.login(this.config.bot.token);
         } catch (e) {
             console.error(e);
-            process.exit(0);
         }
     }
 
