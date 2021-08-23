@@ -32,6 +32,8 @@ export async function startShards() {
         respawn: true,
     });
 
+    let checkingForUpdates = false;
+
     const sendRespawn = (id: number, did = false, problem = false) =>
         shards.broadcastEval(
             async (c, context) => {
@@ -58,7 +60,7 @@ export async function startShards() {
         log(`Shard ${shard.id} created`);
         shard.on("message", async (message: ShardMessage) => {
             if (message.type === "check") {
-                await checkForShardUpdates();
+                if (!checkingForUpdates) await checkForShardUpdates();
             } else if (message.type === "respawn") {
                 if (!message.data?.ids) await respawnShards();
                 else {
@@ -146,6 +148,8 @@ export async function startShards() {
     async function checkForShardUpdates() {
         if (process.env.NODE_ENV === "development") return;
 
+        checkingForUpdates = true;
+
         log("Checking for updates");
 
         const execopts: execa.SyncOptions<string> = {
@@ -158,6 +162,7 @@ export async function startShards() {
 
         if (`${pull.stdout}`.toLowerCase().includes("already up to date")) {
             log("No updates");
+            checkingForUpdates = false;
             return;
         }
 
@@ -175,6 +180,7 @@ export async function startShards() {
 
         log("Restarting shards");
         await respawnShards();
+        checkingForUpdates = false;
     }
 
     await checkForShardUpdates();

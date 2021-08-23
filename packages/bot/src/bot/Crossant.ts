@@ -143,9 +143,15 @@ export default class Crossant {
         if (!this.client.shard) return;
 
         const membersArray = await this.client.shard.broadcastEval(
-            async (c) => c.users.cache.size,
+            async (c) => {
+                return c.users.cache.size;
+            },
         );
-        const total = membersArray.reduce((a, b) => a + b, 0);
+        let total = 0;
+
+        for (const members of membersArray) {
+            total += members;
+        }
 
         this.client.user?.setPresence({
             status: "online",
