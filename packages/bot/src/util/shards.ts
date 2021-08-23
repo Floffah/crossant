@@ -36,6 +36,23 @@ export async function startShards() {
         shard.on("message", async (message: ShardMessage) => {
             if (message.type === "check") {
                 await checkForShardUpdates();
+            } else if (message.type === "respawn") {
+                if (!message.data?.ids) await respawnShards();
+                else {
+                    for (const s of shards.shards.values()) {
+                        if (message.data.ids.includes(s.id)) {
+                            log(`Respawning shard ${s.id}`);
+                            try {
+                                await s.respawn();
+                            } catch (e) {
+                                log(
+                                    `Shard ${s.id} failed to respawn. ${e.message}`,
+                                    true,
+                                );
+                            }
+                        }
+                    }
+                }
             }
         });
     });
