@@ -135,7 +135,7 @@ export default class Crossant {
 
         await this.updatePresence();
 
-        setInterval(() => this.updatePresence());
+        setInterval(() => this.updatePresence(), 1000 * 60 * 5);
     }
 
     async updatePresence() {
