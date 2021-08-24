@@ -206,7 +206,7 @@ export default class Crossant {
             ["WATCHING", "customers of shard {{ shard.id }}"],
         ];
 
-        const message = messages[Math.random() * messages.length];
+        const message = messages[Math.floor(Math.random() * messages.length)];
 
         this.client.user?.setPresence({
             status: "online",
