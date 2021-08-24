@@ -3,10 +3,11 @@ import { PrismaClient } from "@prisma/client";
 import { init, Integrations } from "@sentry/node";
 import axios from "axios";
 import chalk from "chalk";
-import { Client, Snowflake } from "discord.js";
+import { ActivityOptions, Client, Snowflake } from "discord.js";
 import execa from "execa";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { parse, stringify } from "ini";
+import { render } from "mustache";
 import { resolve } from "path";
 import "source-map-support/register";
 import ManagersManager from "../managers/ManagersManager";
@@ -191,50 +192,33 @@ export default class Crossant {
     async ready() {
         this.readyTime = Date.now();
 
-        // await this.updatePresence();
-        // setInterval(() => this.updatePresence(), 1000 * 60 * 5);
+        await this.updatePresence();
+        setInterval(() => this.updatePresence(), 5000);
     }
 
     async updatePresence() {
         if (!this.client.shard) return;
 
-        const membersArray = await this.client.shard.broadcastEval(
-            async (c) => {
-                const guilds = await c.guilds.fetch();
+        const messages: [ActivityOptions["type"], string][] = [
+            ["PLAYING", "with the cabinets"],
+            ["PLAYING", "with some bottles"],
+            ["WATCHING", "people get drunk"],
+            ["WATCHING", "customers of shard {{ shard.id }}"],
+        ];
 
-                const counted: Snowflake[] = [];
-                let total = 0;
-
-                for (const g of guilds.values()) {
-                    let guild = this.client.guilds.resolve(g.id);
-                    if (!guild) guild = await this.client.guilds.fetch(g.id);
-
-                    const members = await guild.members.fetch();
-
-                    for (const member of members.values()) {
-                        if (!counted.includes(member.id)) {
-                            counted.push(member.id);
-                            total += 1;
-                        }
-                    }
-                }
-
-                return total;
-            },
-        );
-        let total = 0;
-
-        for (const members of membersArray) {
-            total += members;
-        }
+        const message = messages[Math.random() * messages.length];
 
         this.client.user?.setPresence({
             status: "online",
             shardId: this.client.shard.ids,
             activities: [
                 {
-                    type: "WATCHING",
-                    name: `${total} customers`,
+                    type: message[0],
+                    name: render(message[1], {
+                        shard: {
+                            id: this.client.shard.ids.join(", "),
+                        },
+                    }),
                 },
             ],
         });
