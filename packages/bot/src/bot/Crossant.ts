@@ -120,11 +120,13 @@ export default class Crossant {
 
                 if (lastCommitSha) command += ` ${lastCommitSha}...HEAD`;
 
-                const commitscmd = `${execa.commandSync(command, {
-                    stdio: "pipe",
-                    cwd: process.cwd(),
-                    env: process.env,
-                })}`
+                const commitscmd = `${
+                    execa.commandSync(command, {
+                        stdio: "pipe",
+                        cwd: process.cwd(),
+                        env: process.env,
+                    }).stdout
+                }`
                     .split("\n")
                     .filter((v) => !/^\s*$/.test(v));
 
