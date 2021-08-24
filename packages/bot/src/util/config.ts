@@ -5,6 +5,7 @@ export const defaultConfig = {
         supportGuild: "872068506886217790",
         owners: ["221524691079266314"],
     },
+
     sentry: {
         dsn: "https://examplePublicKey@example.ingest.sentry.io/example",
         releases:
