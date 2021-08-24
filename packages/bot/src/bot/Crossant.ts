@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { init, Integrations } from "@sentry/node";
 import axios from "axios";
 import chalk from "chalk";
-import { ActivityOptions, Client, Snowflake } from "discord.js";
+import { ActivityOptions, Client } from "discord.js";
 import execa from "execa";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { parse, stringify } from "ini";

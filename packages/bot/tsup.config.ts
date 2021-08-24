@@ -14,6 +14,6 @@ export const tsup: Options = {
     splitting: true,
     bundle: true,
     target: "node16",
-    dts: true,
+    dts: false,
     sourcemap: true,
 };
