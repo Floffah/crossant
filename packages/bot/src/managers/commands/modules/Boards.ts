@@ -61,7 +61,7 @@ export default class BoardsModule extends Module {
             },
         );
 
-        if (existing && r.count < 1) {
+        if (existing && r.count < found.minReactions) {
             const ch = (await this.managers.bot.client.channels.fetch(
                 found.channelId as Snowflake,
             )) as TextChannel;
@@ -82,7 +82,7 @@ export default class BoardsModule extends Module {
             return;
         }
 
-        if (r.count < 1) return;
+        if (r.count < found.minReactions) return;
         if (!r.message.author) return;
 
         const user = await r.message.author.fetch();
