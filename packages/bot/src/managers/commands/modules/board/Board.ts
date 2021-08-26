@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { GuildChannel } from "discord.js";
 import IncomingSlashCommand from "src/managers/commands/structures/IncomingSlashCommand";
 import SlashCommand from "src/managers/commands/structures/SlashCommand";
@@ -25,6 +25,35 @@ export default class BoardCommand extends SlashCommand {
                                     "Channel to send board messages",
                                 )
                                 .setRequired(true),
+                        )
+                        .addIntegerOption((o) =>
+                            o
+                                .setName("min")
+                                .setDescription(
+                                    "Minimum reactions needed to send a message in the board channel",
+                                )
+                                .setRequired(false),
+                        ),
+                )
+                .addSubcommand((c) =>
+                    c
+                        .setName("edit")
+                        .setDescription("Edit a boards information")
+                        .addIntegerOption((o) =>
+                            o
+                                .setName("id")
+                                .setDescription(
+                                    "ID of the board (run `/board list #channel` to find it)",
+                                )
+                                .setRequired(true),
+                        )
+                        .addIntegerOption((o) =>
+                            o
+                                .setName("min")
+                                .setDescription(
+                                    "Minimum reactions needed to send a message in the board channel",
+                                )
+                                .setRequired(false),
                         ),
                 )
                 .addSubcommand((c) =>
@@ -62,6 +91,7 @@ export default class BoardCommand extends SlashCommand {
         console.log(sub);
 
         if (sub === "create") await this.create(i);
+        else if (sub === "edit") await this.edit(i);
         else if (sub === "delete") await this.delete(i);
         else if (sub === "list") await this.list(i);
     }
@@ -87,6 +117,8 @@ export default class BoardCommand extends SlashCommand {
         if (!channel.isText()) throw "Channel must be text based";
         if (!i.channel.isText()) throw "Current channel must be text";
 
+        const minReactions = i.options.getInteger("min");
+
         const reacter = await i.channel.send("Finding emoji identifier...");
         const reaction = await reacter.react(emoji);
 
@@ -110,6 +142,7 @@ export default class BoardCommand extends SlashCommand {
             data: {
                 channelId: channel.id,
                 emoji: reaction.emoji.identifier,
+                minReactions: minReactions ?? undefined,
                 guild: {
                     connectOrCreate: {
                         where: {
@@ -127,6 +160,56 @@ export default class BoardCommand extends SlashCommand {
 
         await i.reply(
             `Created guild board in <#${channel.id}> with emoji ${emoji}`,
+        );
+    }
+
+    async edit(i: IncomingSlashCommand) {
+        if (!i.guild || !i.member) throw "Must be ran in a guild";
+        if (
+            !i.member.permissions.has("MANAGE_CHANNELS", true) ||
+            !i.member.permissions.has("MANAGE_EMOJIS_AND_STICKERS")
+        )
+            throw "Must have permission MANAGE_CHANNELS and MANAGE_EMOJIS";
+
+        const id = i.options.getInteger("id", true);
+
+        const found = await this.module.managers.bot.db.guildBoard.findFirst({
+            where: {
+                id: id,
+            },
+        });
+
+        if (!found)
+            throw `Could not find guild board of id ${id}. Use \`/board list\` to find guild boards for a specific channel`;
+        if (found.guildId !== i.guild.id)
+            throw `Guild board of id ${id} does not belong to this guild`;
+
+        const editMsg: string[] = [];
+
+        const minReactions = i.options.getInteger("min");
+
+        const update: Parameters<
+            typeof PrismaClient.prototype.guildBoard.update
+        >[0]["data"] = {};
+
+        if (minReactions) {
+            editMsg.push(
+                `Minimum reactions: **${found.minReactions}** -> **${minReactions}**`,
+            );
+            update.minReactions = found.minReactions;
+        }
+
+        await this.module.managers.bot.db.guildBoard.update({
+            data: update,
+            where: {
+                id: found.id,
+            },
+        });
+
+        await i.reply(
+            `Edited the following information:\n${editMsg
+                .map((s) => ` - ${s}`)
+                .join("\n")}`,
         );
     }
 
