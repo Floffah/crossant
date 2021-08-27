@@ -163,7 +163,13 @@ export default class CommandsManager extends Manager {
                 let deferredMessage: Message | undefined = undefined;
 
                 if (command.opts.deferred)
-                    deferredMessage = await msg.reply("Processing...");
+                    deferredMessage = await msg.reply(
+                        "Please note that message commands will be Disabled on Crossant soon because Discord is making messages a privileged intent.\nProcessing...",
+                    );
+                else
+                    deferredMessage = await msg.reply(
+                        "Please note that message commands will be Disabled on Crossant soon because Discord is making messages a privileged intent.",
+                    );
 
                 try {
                     const options = await parseToOptions(

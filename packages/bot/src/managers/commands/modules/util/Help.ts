@@ -77,7 +77,7 @@ export default class HelpCommand extends SlashCommand {
 
             await i.reply({
                 embeds: [
-                    defaultEmbed()
+                    defaultEmbed(true)
                         .setTitle(
                             `"${cmd.name}${
                                 groups.length > 0 ? " " + groups.join(" ") : ""
@@ -91,7 +91,7 @@ export default class HelpCommand extends SlashCommand {
                 ],
             });
         } else {
-            const embed = defaultEmbed().setTitle("Help")
+            const embed = defaultEmbed(true).setTitle("Help")
                 .setDescription(stripIndents`
                 Each of the following commands can be ran using \`${prefix}command\` or through Discord's slash commands. Press \`/\` for more help with slash comands.
                 

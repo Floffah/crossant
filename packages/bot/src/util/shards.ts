@@ -35,7 +35,11 @@ export async function startShards() {
 
     let checkingForUpdates = false;
 
-    const sendRespawn = (id: number, did = false, problem = false) =>
+    const sendRespawn = (
+        id: number,
+        message: string,
+        additional = (e: MessageEmbed) => e,
+    ) =>
         shards.broadcastEval(
             async (c, context) => {
                 const channel = c.channels.resolve("879415229375717406") as
@@ -48,10 +52,8 @@ export async function startShards() {
             },
             {
                 context: {
-                    embed: defaultEmbed().setTitle(
-                        `Shard ${id} ${problem ? "had a problem while " : ""}${
-                            did && !problem ? "respawned" : "respawning"
-                        }`,
+                    embed: additional(
+                        defaultEmbed().setTitle(`Shard ${id} ${message}`),
                     ),
                 },
             },
@@ -69,15 +71,19 @@ export async function startShards() {
                         if (message.data.ids.includes(s.id)) {
                             log(`Respawning shard ${s.id}`);
                             try {
-                                await sendRespawn(s.id);
+                                await sendRespawn(s.id, "respawning");
                                 await s.respawn();
-                                await sendRespawn(s.id, true);
+                                await sendRespawn(s.id, "respawning");
                             } catch (e) {
                                 log(
                                     `Shard ${s.id} failed to respawn. ${e.message}`,
                                     true,
                                 );
-                                await sendRespawn(s.id, true, true);
+                                await sendRespawn(
+                                    s.id,
+                                    "failed to respawn",
+                                    (e) => e.setDescription(`${e}`),
+                                );
                             }
                         }
                     }
@@ -94,14 +100,16 @@ export async function startShards() {
         for (const s of shards.shards.values()) {
             log(`Respawning shard ${s.id}`);
             try {
-                await sendRespawn(s.id);
+                await sendRespawn(s.id, "respawning");
                 await s.respawn();
                 which.push(s.id);
-                await sendRespawn(s.id, true);
+                await sendRespawn(s.id, "respawned");
             } catch (e) {
                 log(`Shard ${s.id} failed to respawn. ${e.message}`, true);
                 faults.push(s.id);
-                await sendRespawn(s.id, true, true);
+                await sendRespawn(s.id, "failed to respawn", (e) =>
+                    e.setDescription(`${e}`),
+                );
             }
         }
 
@@ -165,6 +173,14 @@ export async function startShards() {
             log("No updates");
             checkingForUpdates = false;
             return;
+        }
+
+        for (const s of shards.shards.values()) {
+            log(`Stopping shard ${s.id} to apply updates`);
+
+            await sendRespawn(s.id, "stopping to apply updates");
+            s.kill();
+            await sendRespawn(s.id, "stopped");
         }
 
         log("Installing dependencies");
