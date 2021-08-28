@@ -27,7 +27,7 @@ export async function startShards() {
 
     const customMetrics = {
         respawning: pm2.metric({ name: "Respawning" }),
-        totalShards: pm2.metric({ name: "Total shards", unit: "shards" }),
+        totalShards: pm2.metric({ name: "Total shards", unit: " shards" }),
         updating: pm2.metric({ name: "Checking for updates" }),
     };
 

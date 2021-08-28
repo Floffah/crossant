@@ -131,28 +131,30 @@ export default class Crossant {
                     .split("\n")
                     .filter((v) => !/^\s*$/.test(v));
 
-                const commits = commitscmd.map((c) => ({
-                    id: c,
-                    repository: "Floffah/crossant",
-                }));
+                if (commitscmd.length > 0) {
+                    const commits = commitscmd.map((c) => ({
+                        id: c,
+                        repository: "Floffah/crossant",
+                    }));
 
-                this.config.sentry.lastCommit = commitscmd[0];
-                this.writeConfig();
+                    this.config.sentry.lastCommit = commitscmd[0];
+                    this.writeConfig();
 
-                await axios.post(
-                    this.config.sentry.releases,
-                    {
-                        commits,
-                        version: commitscmd[0],
-                        projects: ["crossant-shard"],
-                    },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${this.config.sentry.authToken}`,
+                    await axios.post(
+                        this.config.sentry.releases,
+                        {
+                            commits,
+                            version: commitscmd[0],
+                            projects: ["crossant-shard"],
                         },
-                    },
-                );
+                        {
+                            headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${this.config.sentry.authToken}`,
+                            },
+                        },
+                    );
+                }
 
                 init({
                     dsn: this.config.sentry.dsn,
