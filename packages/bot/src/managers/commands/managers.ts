@@ -1,12 +1,12 @@
-import CacheManager from "src/managers/commands/CacheManager";
+import GuildManager from "src/managers/commands/GuildManager";
 import CommandsManager from "src/managers/commands/CommandsManager";
 
 export enum ManagerNames {
-    CacheManager = "cache",
+    GuildManager = "cache",
     CommandsManager = "commands",
 }
 
 export interface ManagerTypes {
-    [ManagerNames.CacheManager]: CacheManager;
+    [ManagerNames.GuildManager]: GuildManager;
     [ManagerNames.CommandsManager]: CommandsManager;
 }

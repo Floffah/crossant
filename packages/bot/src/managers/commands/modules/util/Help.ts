@@ -28,7 +28,7 @@ export default class HelpCommand extends SlashCommand {
     async incoming(i: IncomingSlashCommand) {
         if (!i.hasGuild || !i.guild) throw "Must have guild";
 
-        const cache = this.module.managers.get(ManagerNames.CacheManager);
+        const cache = this.module.managers.get(ManagerNames.GuildManager);
         if (!cache) throw "No cache manager";
         const cmds = this.module.managers.get(ManagerNames.CommandsManager);
         if (!cmds) throw "No command manager";

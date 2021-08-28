@@ -47,6 +47,28 @@ model Guild {
   // --
   // references
   pingMessages PingMessage[]
+  settings     GuildSetting[]
+}
+
+model GuildSetting {
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  guildId String
+
+  name      String
+  type      SettingType
+  value     Json // { value: any }
+  arrayType Boolean     @default(false)
+
+  @@id([guildId, name])
+}
+
+enum SettingType {
+  STRING
+  NUMBER
+  BOOLEAN
+  CHANNEL
+  ROLE
+  USER
 }
 
 model GuildBoard {
@@ -54,9 +76,9 @@ model GuildBoard {
   guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
   guildId String
 
-  channelId String
-  emoji     String
-  minReactions Int @default(2)
+  channelId    String
+  emoji        String
+  minReactions Int    @default(2)
 
   messages GuildBoardMessage[]
 }

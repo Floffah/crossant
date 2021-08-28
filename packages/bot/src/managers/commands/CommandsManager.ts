@@ -134,7 +134,7 @@ export default class CommandsManager extends Manager {
     async message(msg: Message) {
         if (msg.author.bot) return;
 
-        const cache = this.managers.get(ManagerNames.CacheManager);
+        const cache = this.managers.get(ManagerNames.GuildManager);
         if (!cache) return;
 
         const prefix = msg.guild

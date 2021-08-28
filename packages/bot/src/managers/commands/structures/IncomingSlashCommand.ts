@@ -52,7 +52,6 @@ export default class IncomingSlashCommand<
         this.type = CommandType.CHAT_INPUT;
 
         this.managers = opts.managers;
-        this.managers = opts.managers;
         this.command = opts.command;
 
         this.interaction = opts.interaction;

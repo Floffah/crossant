@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import CacheManager from "src/managers/commands/CacheManager";
+import GuildManager from "src/managers/commands/GuildManager";
 import { ManagerNames, ManagerTypes } from "src/managers/commands/managers";
 import TypedEventEmitter from "typed-emitter";
 import Crossant from "../bot/Crossant";
@@ -27,7 +27,7 @@ class ManagersManager extends TypedEmitter {
     async startManagers() {
         const raw: { new (manager: ManagersManager): Manager }[] = [
             CommandsManager,
-            CacheManager,
+            GuildManager,
         ];
 
         for (const manager of raw) {
