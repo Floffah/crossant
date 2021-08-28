@@ -208,8 +208,12 @@ export async function startShards() {
             log(`Stopping shard ${s.id} to apply updates`);
 
             await sendRespawn(s.id, "stopping to apply updates");
-            s.kill();
-            await sendRespawn(s.id, "stopped");
+            try {
+                s.kill();
+                await sendRespawn(s.id, "stopped");
+            } catch (e) {
+                await sendRespawn(s.id, "not stopped");
+            }
         }
 
         log("Installing dependencies");
