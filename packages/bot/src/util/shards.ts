@@ -209,6 +209,7 @@ export async function startShards() {
         if (`${pull.stdout}`.toLowerCase().includes("already up to date")) {
             log("No updates");
             checkingForUpdates = false;
+            customMetrics.updating.set(false);
             return;
         }
 
