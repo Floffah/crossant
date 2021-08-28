@@ -1,9 +1,12 @@
 import { SettingType } from "@prisma/client";
-import { Snowflake } from "discord.js";
+import { PermissionString, Snowflake } from "discord.js";
 
 export interface GuildSettingInfo<Type extends SettingType> {
     defaultValue: SettingTypesMap[Type];
     type: Type;
+    arrayType?: boolean;
+    description: string;
+    permission?: PermissionString;
 }
 
 export interface SettingTypesMap {
@@ -23,5 +26,7 @@ export const guildSettings: {
     "pingMessage.enabled": {
         defaultValue: true,
         type: SettingType.BOOLEAN,
+        description:
+            "When enabled, allows members of your server to use /pingmsg to send a message when someone pings them.",
     },
 };

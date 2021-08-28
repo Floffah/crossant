@@ -1,4 +1,4 @@
-import { APIInteractionGuildMember } from "discord-api-types";
+import { APIInteractionGuildMember, APIMessage } from "discord-api-types/v9";
 import {
     CommandInteraction,
     CommandInteractionOptionResolver,
@@ -117,22 +117,31 @@ export default class IncomingSlashCommand<
             this.interaction
         ) {
             if (this.previouslySimulated) {
-                await this.interaction.editReply(content);
+                return await this.interaction.editReply(content);
             } else {
-                await this.interaction.reply(content);
                 this.previouslySimulated = true;
+                return await this.interaction.reply(
+                    typeof content === "string"
+                        ? { content, fetchReply: true }
+                        : { ...content, fetchReply: true },
+                );
             }
         } else {
+            let message: Message | APIMessage;
             if (this.lastSimulatedMessage && this.previouslySimulated) {
-                await this.lastSimulatedMessage.edit(content);
+                message = await this.lastSimulatedMessage.edit(content);
             } else if (this.message) {
-                this.lastSimulatedMessage = await this.message.reply(content);
+                message = this.lastSimulatedMessage = await this.message.reply(
+                    content,
+                );
             } else {
                 throw new Error("Nothing to reply to");
             }
 
             if (this.command.opts?.ephemeral && this.lastSimulatedMessage)
                 this.safelyDeleteSimulated();
+
+            return message;
         }
     }
 
@@ -141,11 +150,12 @@ export default class IncomingSlashCommand<
             this.commandType === SlashCommandType.INTERACTION &&
             this.interaction
         ) {
-            await this.interaction.editReply(content);
+            return await this.interaction.editReply(content);
         } else if (this.lastSimulatedMessage && this.previouslySimulated) {
-            await this.lastSimulatedMessage.edit(content);
+            const message = await this.lastSimulatedMessage.edit(content);
             this.safelyDeleteSimulated();
-        }
+            return message;
+        } else throw "No message to edit";
     }
 
     async deleteReply() {

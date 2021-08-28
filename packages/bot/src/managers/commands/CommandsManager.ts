@@ -1,6 +1,7 @@
 import { Routes } from "discord-api-types/v9";
 import { ApplicationCommandData, Interaction, Message } from "discord.js";
 import { ManagerNames } from "src/managers/commands/managers";
+import AdminModule from "src/managers/commands/modules/Admin";
 import BoardsModule from "src/managers/commands/modules/Boards";
 import DevModule from "src/managers/commands/modules/Dev";
 import UtilModule from "src/managers/commands/modules/Util";
@@ -27,6 +28,7 @@ export default class CommandsManager extends Manager {
     modules: Map<string, Module> = new Map();
 
     initialModules: { new (): Module }[] = [
+        AdminModule,
         BoardsModule,
         UtilModule,
         DevModule,
