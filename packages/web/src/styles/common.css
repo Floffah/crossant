@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind screens;
+@tailwind utilities;
+
+body, html {
+    text-rendering: optimizeLegibility;
+    image-rendering: high-quality;
+    color-rendering: optimizeQuality;
+    shape-rendering: geometricPrecision;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    @apply text-gray-400;
+}
+
+*:is(h1, h2, h3, h4, h5, h6) a {
+    @apply text-gray-400;
+}
+
+*:is(h1, h2, h3, h4, h5, h6) a:active {
+    @apply text-blue-400 !important;
+}
+
+a {
+    @apply text-blue-400;
+}
+
+a:active {
+    @apply text-blue-600 !important;
+}
+
+@layer utilities {
+    .translate-center {
+        transform: translate(-50%, -50%);
+        left: 50%;
+        top: 50%;
+        position: absolute;
+    }
+    .translate-center-x {
+        transform:translateX(-50%);
+        left: 50%;
+    }
+    .translate-center-y {
+        transform: translateY(-50%);
+        top: 50%;
+        position: absolute;
+    }
+}

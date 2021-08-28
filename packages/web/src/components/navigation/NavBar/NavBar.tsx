@@ -2,7 +2,7 @@ import React, { FC } from "react";
 import Icon from "@mdi/react";
 import { mdiMoonWaxingCrescent, mdiWeatherSunny } from "@mdi/js";
 import { useRouter } from "next/router";
-import { useSwitchTheme } from "../../../lib/hooks/theme";
+import { useSwitchTheme } from "src/lib/hooks/theme";
 
 const NavBar: FC = () => {
     const router = useRouter();

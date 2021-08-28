@@ -1,7 +1,7 @@
 import React, { FC } from "react";
-import NavBar from "../components/navigation/NavBar/NavBar";
 import { NextSeo } from "next-seo";
-import HomeHeader from "../components/display/HomeHeader";
+import HomeHeader from "src/components/display/HomeHeader";
+import NavBar from "src/components/navigation/NavBar/NavBar";
 
 const IndexPage: FC = () => {
     return (

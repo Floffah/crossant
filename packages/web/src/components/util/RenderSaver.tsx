@@ -1,10 +1,11 @@
 import React from "react";
-import { useSwitchTheme } from "../../lib/hooks/theme";
+import { useSwitchTheme } from "src/lib/hooks/theme";
 import { useHotkeys } from "react-hotkeys-hook";
-import { ThemeName } from "../../lib/util/localStorage";
+import { ThemeName } from "src/lib/util/localStorage";
+import NextNProgress from "nextjs-progressbar";
 
 export default function RenderSaver() {
-    const { switchTheme } = useSwitchTheme();
+    const { switchTheme, theme } = useSwitchTheme();
 
     if (typeof localStorage !== "undefined") {
         let theme = localStorage.getItem(ThemeName);
@@ -23,5 +24,18 @@ export default function RenderSaver() {
 
     useHotkeys("CTRL+SHIFT+L", () => switchTheme());
 
-    return <></>;
+    return (
+        <>
+            <NextNProgress
+                color={theme === "dark" ? "#0891B2" : "#22D3EE"}
+                startPosition={0.3}
+                stopDelayMs={200}
+                height={2}
+                showOnShallow={true}
+                options={{
+                    showSpinner: false,
+                }}
+            />
+        </>
+    );
 }

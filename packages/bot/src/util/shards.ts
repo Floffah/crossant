@@ -170,7 +170,11 @@ export async function startShards() {
             await respawnShards();
         } else if (key.ctrl && key.name === "c") {
             for (const s of shards.shards.values()) {
-                s.kill();
+                try {
+                    s.kill();
+                } catch (e) {
+                    console.error(e);
+                }
             }
 
             process.exit();
@@ -179,7 +183,11 @@ export async function startShards() {
     ["SIGINT", "SIGUSR1", "SIGUSR2"].map((e) =>
         process.on(e, () => {
             for (const s of shards.shards.values()) {
-                s.kill();
+                try {
+                    s.kill();
+                } catch (e) {
+                    console.error(e);
+                }
             }
 
             process.exit();
@@ -221,7 +229,7 @@ export async function startShards() {
                 s.kill();
                 await sendRespawn(s.id, "stopped");
             } catch (e) {
-                await sendRespawn(s.id, "not stopped");
+                console.error(e);
             }
         }
 
