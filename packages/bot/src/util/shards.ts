@@ -1,4 +1,5 @@
 import "source-map-support/register";
+import io from "@pm2/io";
 import chalk from "chalk";
 import { MessageEmbed, ShardingManager, TextChannel } from "discord.js";
 import execa from "execa";
@@ -12,6 +13,26 @@ import { ShardMessage } from "src/util/shardmessages";
 const keypress = require("keypress");
 
 export async function startShards() {
+    const pm2 = io.init({
+        metrics: {
+            network: true,
+            http: true,
+            eventLoop: true,
+            v8: true,
+            runtime: true,
+        },
+        profiling: true,
+        tracing: true,
+    });
+
+    const customMetrics = {
+        respawning: pm2.metric({ name: "Respawning" }),
+        totalShards: pm2.metric({ name: "Total shards", unit: "shards" }),
+        updating: pm2.metric({ name: "Checking for updates" }),
+    };
+
+    customMetrics.respawning.set(false);
+
     const log = (msg: string, err = false) =>
         (err ? console.error : console.log)(
             chalk`{red !}{magenta manager} ${msg}`,
@@ -32,6 +53,7 @@ export async function startShards() {
         token: config.bot.token,
         respawn: true,
     });
+    customMetrics.totalShards.set(shards.shards.size);
 
     let checkingForUpdates = false;
 
@@ -61,12 +83,14 @@ export async function startShards() {
 
     shards.on("shardCreate", (shard) => {
         log(`Shard ${shard.id} created`);
+        customMetrics.totalShards.set(shards.shards.size);
         shard.on("message", async (message: ShardMessage) => {
             if (message.type === "check") {
                 if (!checkingForUpdates) await checkForShardUpdates();
             } else if (message.type === "respawn") {
                 if (!message.data?.ids) await respawnShards();
                 else {
+                    customMetrics.respawning.set(true);
                     for (const s of shards.shards.values()) {
                         if (message.data.ids.includes(s.id)) {
                             log(`Respawning shard ${s.id}`);
@@ -87,21 +111,24 @@ export async function startShards() {
                             }
                         }
                     }
+                    customMetrics.respawning.set(false);
                 }
             }
         });
     });
 
-    async function respawnShards() {
+    async function respawnShards(start = false) {
         log(`Respawning all shards`);
         const which: number[] = [];
         const faults: number[] = [];
 
+        customMetrics.respawning.set(true);
         for (const s of shards.shards.values()) {
             log(`Respawning shard ${s.id}`);
             try {
                 await sendRespawn(s.id, "respawning");
-                await s.respawn();
+                if (start) await s.spawn();
+                else await s.respawn();
                 which.push(s.id);
                 await sendRespawn(s.id, "respawned");
             } catch (e) {
@@ -112,6 +139,7 @@ export async function startShards() {
                 );
             }
         }
+        customMetrics.respawning.set(false);
 
         log(
             `Respawned ${which.length} ${pluralize(
@@ -160,6 +188,7 @@ export async function startShards() {
         checkingForUpdates = true;
 
         log("Checking for updates");
+        customMetrics.updating.set(true);
 
         const execopts: execa.SyncOptions<string> = {
             stdio: "pipe",
@@ -196,8 +225,9 @@ export async function startShards() {
         execa.commandSync("yarn workspace crossant tsup --minify", execopts);
 
         log("Restarting shards");
-        await respawnShards();
+        await respawnShards(true);
         checkingForUpdates = false;
+        customMetrics.updating.set(false);
     }
 
     await checkForShardUpdates();

@@ -9,6 +9,7 @@ export const tsup: Options = {
         "@prisma/client",
         "winston",
         "terminal-kit",
+        "@pm2/*",
     ],
     clean: true,
     splitting: true,

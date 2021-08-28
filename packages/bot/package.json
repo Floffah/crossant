@@ -26,6 +26,7 @@
     "dependencies": {
         "@discordjs/builders": "^0.6.0",
         "@discordjs/rest": "^0.1.0-canary.0",
+        "@pm2/io": "^5.0.0",
         "@prisma/client": "^2.30.0",
         "@sentry/node": "^6.11.0",
         "@sentry/tracing": "^6.11.0",
