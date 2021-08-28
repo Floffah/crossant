@@ -117,7 +117,7 @@ export async function startShards() {
         });
     });
 
-    async function respawnShards(start = false) {
+    async function respawnShards(start = false, doThrow = false) {
         log(`Respawning all shards`);
         const which: number[] = [];
         const faults: number[] = [];
@@ -134,6 +134,7 @@ export async function startShards() {
             } catch (e) {
                 log(`Shard ${s.id} failed to respawn. ${e.message}`, true);
                 faults.push(s.id);
+                if (doThrow) throw e;
                 try {
                     await sendRespawn(s.id, "failed to respawn", (e) =>
                         e.setDescription(`${e}`),
@@ -246,7 +247,11 @@ export async function startShards() {
         execa.commandSync("yarn workspace crossant tsup --minify", execopts);
 
         log("Restarting shards");
-        await respawnShards(true);
+        try {
+            await respawnShards(true, true);
+        } catch (e) {
+            process.exit(0);
+        }
         checkingForUpdates = false;
         customMetrics.updating.set(false);
     }
