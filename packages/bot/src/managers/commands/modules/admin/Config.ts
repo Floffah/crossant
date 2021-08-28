@@ -1,4 +1,3 @@
-import { stripIndents } from "common-tags";
 import { APIMessage } from "discord-api-types/v9";
 import {
     GuildChannel,
@@ -104,12 +103,10 @@ export default class ConfigCommand extends SlashCommand {
             if (!(i.channel instanceof GuildChannel) || !i.channel.isText())
                 throw "Must be ran in a guild and in a text channel";
 
-            let list = stripIndents`
-                To set a specific setting, run "/config set entryname". For this, you will need to specify a specific option, e.g. for a channel, channel:#channel or for a member, user:@user
-                To get information about a specific setting, run "/config info entryname".
-                Use the buttons below to navigate the page
-                
-            `;
+            let list =
+                "To set a specific setting, run `/config set entryname`. For this, you will need to specify a specific option, e.g. for a channel, channel:#channel or for a member, user:@user\n" +
+                "To get information about a specific setting, run `/config info entryname`.\n" +
+                "Use the buttons below to navigate the page\n\n";
 
             for (
                 let i = currentPage * 10 - 1;
@@ -119,19 +116,22 @@ export default class ConfigCommand extends SlashCommand {
                 if (keys[i]) {
                     const setting = guildSettings[keys[i]];
 
-                    list += `**${keys[i]}**: ${
+                    list += ` - **\`${keys[i]}:\`** ${
                         setting.description
-                    } Type: ${setting.type.toLowerCase()}, Default: ${
+                    } **Type:** \`${setting.type.toLowerCase()}\`, **Default:** \`${
                         setting.defaultValue
-                    }${
+                    }\`${
                         setting.permission
-                            ? `, Permission: ${setting.permission}`
+                            ? `, **Permission:** \`${setting.permission}\``
                             : ""
                     }\n`;
                 }
             }
 
             embed.setDescription(list);
+            embed.setFooter(
+                `Page ${currentPage + 1}/${Math.ceil(keys.length / 10)}`,
+            );
 
             const buttons = new MessageActionRow({
                 components: [
@@ -139,14 +139,14 @@ export default class ConfigCommand extends SlashCommand {
                         style: "SECONDARY",
                         customId: "previous",
                         label: "Previous",
-                        emoji: "arrow_left",
+                        emoji: "⬅️",
                         disabled: currentPage === 0,
                     }),
                     new MessageButton({
                         style: "SECONDARY",
                         customId: "next",
                         label: "Next",
-                        emoji: "arrow_right",
+                        emoji: "➡️",
                         disabled: keys.length > currentPage * 10,
                     }),
                 ],
@@ -172,11 +172,14 @@ export default class ConfigCommand extends SlashCommand {
                     c.user.id === i.user.id &&
                     ["previous", "next"].includes(c.customId) &&
                     c.message.id === message.id,
+                time: 5 * 60 * 1000,
             });
 
-            if (component.customId === "previous") currentPage--;
-            else if (component.customId === "next") currentPage++;
-            await calcPage();
+            if (component) {
+                if (component.customId === "previous") currentPage--;
+                else if (component.customId === "next") currentPage++;
+                await calcPage();
+            }
         };
 
         await calcPage();

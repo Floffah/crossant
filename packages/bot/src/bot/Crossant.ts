@@ -113,7 +113,7 @@ export default class Crossant {
                 );
             } else this.logger.info("Sharding disabled");
 
-            if (this.config.sentry) {
+            if (this.config.sentry && !this.debugmode) {
                 const lastCommitSha = this.config.sentry?.lastCommit;
 
                 let command =
