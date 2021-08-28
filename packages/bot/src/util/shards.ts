@@ -134,9 +134,17 @@ export async function startShards() {
             } catch (e) {
                 log(`Shard ${s.id} failed to respawn. ${e.message}`, true);
                 faults.push(s.id);
-                await sendRespawn(s.id, "failed to respawn", (e) =>
-                    e.setDescription(`${e}`),
-                );
+                try {
+                    await sendRespawn(s.id, "failed to respawn", (e) =>
+                        e.setDescription(`${e}`),
+                    );
+                } catch (e) {
+                    log(
+                        "Could not notify devs that shard " +
+                            s.id +
+                            " failed to respawn",
+                    );
+                }
             }
         }
         customMetrics.respawning.set(false);
@@ -207,8 +215,8 @@ export async function startShards() {
         for (const s of shards.shards.values()) {
             log(`Stopping shard ${s.id} to apply updates`);
 
-            await sendRespawn(s.id, "stopping to apply updates");
             try {
+                await sendRespawn(s.id, "stopping to apply updates");
                 s.kill();
                 await sendRespawn(s.id, "stopped");
             } catch (e) {
