@@ -243,6 +243,8 @@ export async function startShards() {
         customMetrics.updating.set(false);
     }
 
+    pm2.action("Check for updates", undefined, () => checkForShardUpdates());
+
     await checkForShardUpdates();
 
     setInterval(() => {
