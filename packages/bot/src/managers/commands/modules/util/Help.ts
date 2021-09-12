@@ -1,8 +1,6 @@
 import { stripIndents } from "common-tags";
-import {
-    APIApplicationCommandOption,
-    APIApplicationCommandSubCommandOptions,
-} from "discord-api-types/payloads/v9/_interactions/slashCommands";
+import { APIApplicationCommandOption } from "discord-api-types";
+import { APIApplicationCommandSubCommandOptions } from "discord-api-types/v9";
 import { ManagerNames } from "src/managers/commands/managers";
 import { CommandName } from "src/managers/commands/structures/BaseCommand";
 import { ApplicationCommandOptionType } from "src/util/djs/enums";

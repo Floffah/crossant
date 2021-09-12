@@ -5,18 +5,18 @@
     "private": true,
     "devDependencies": {
         "@floffah/build": "^1.0.0",
-        "@prisma/client": "^2.30.0",
-        "@typescript-eslint/eslint-plugin": "^4.29.3",
-        "@typescript-eslint/parser": "^4.29.3",
+        "@prisma/client": "^3.0.2",
+        "@typescript-eslint/eslint-plugin": "^4.31.0",
+        "@typescript-eslint/parser": "^4.31.0",
         "commitizen": "^4.2.4",
         "cz-conventional-changelog": "3.3.0",
         "eslint": "^7.32.0",
-        "eslint-config-next": "^11.1.0",
+        "eslint-config-next": "^11.1.2",
         "eslint-config-prettier": "^8.3.0",
-        "npm-check-updates": "^11.8.3",
-        "prettier": "^2.3.2",
-        "prisma": "^2.30.0",
-        "typescript": "^4.4.2"
+        "npm-check-updates": "^11.8.5",
+        "prettier": "^2.4.0",
+        "prisma": "^3.0.2",
+        "typescript": "^4.4.3"
     },
     "workspaces": [
         "packages/*"
@@ -28,5 +28,5 @@
         "dev:rawrun": "node packages/bot/dist/shardstart.js --debug",
         "dev:web": "yarn workspace crossant-web next dev"
     },
-    "packageManager": "yarn@3.0.1"
+    "packageManager": "yarn@3.0.2"
 }
