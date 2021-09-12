@@ -102,22 +102,18 @@ export default class ConfigCommand extends SlashCommand {
     async setCommand(i: IncomingSlashCommand) {
         if (!i.member || !i.guild)
             throw "This command can only be used in a guild";
-        console.log(1);
 
         const entryName = i.options.getString("entry", true) as ValueOf<
             typeof guildSettingNames
         >;
-        console.log(2);
 
         if (!(entryName in guildSettings))
             throw "Config entry not found. If you think this was a mistake, try again in a few minutes to let the bot update everywhere";
-        console.log(3);
 
         const entry = guildSettings[entryName];
 
         if (entry.permission && !i.member.permissions.has(entry.permission))
             throw "No permission";
-        console.log(4);
 
         let value: any;
 
@@ -132,14 +128,11 @@ export default class ConfigCommand extends SlashCommand {
         else if (entry.type === SettingType.ROLE)
             value = i.options.getRole("role", true).id;
         else value = i.options.getString("string", true);
-        console.log(5);
 
         const guilds = this.module.managers.get(ManagerNames.GuildManager);
         if (!guilds) throw "No guild manager";
-        console.log(6);
 
         await guilds.setSetting(i.guild, entryName, value, entry.type);
-        console.log(7);
 
         await i.reply(`${entryName} is now set to \`${value}\``);
     }
