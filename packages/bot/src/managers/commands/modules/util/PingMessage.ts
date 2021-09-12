@@ -1,6 +1,8 @@
+import { ManagerNames } from "src/managers/commands/managers";
 import IncomingSlashCommand from "src/managers/commands/structures/IncomingSlashCommand";
 import SlashCommand from "src/managers/commands/structures/SlashCommand";
 import { defaultEmbed } from "src/util/embeds";
+import { guildSettingNames } from "src/util/settings";
 
 export default class PingMessageCommand extends SlashCommand {
     constructor() {
@@ -46,6 +48,16 @@ export default class PingMessageCommand extends SlashCommand {
 
     async setCmd(i: IncomingSlashCommand) {
         if (!i.guild) throw "Must be in a guild";
+
+        const guilds = this.module.managers.get(ManagerNames.GuildManager);
+        if (!guilds) throw "No guild manager";
+
+        const pmsg = (await guilds.getBasicSetting(
+            i.guild,
+            guildSettingNames.PingMessageEnabled,
+        )) as boolean;
+
+        if (!pmsg) throw "Ping messages are disabled in this guild";
 
         const message = `<@${i.user.id}> is ${i.options.getString(
             "message",

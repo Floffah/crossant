@@ -9,7 +9,12 @@ import {
 import { ManagerNames } from "src/managers/commands/managers";
 import Manager from "src/managers/Manager";
 import ManagersManager from "src/managers/ManagersManager";
-import { guildSettings, SettingTypesMap } from "src/util/settings";
+import {
+    guildSettingNames,
+    guildSettings,
+    SettingTypesMap,
+} from "src/util/settings";
+import { ValueOf } from "src/util/types";
 
 export default class GuildManager extends Manager {
     prefixes: { [k: string]: string | number } = {}; // snowflake -> prefix/last check returned none
@@ -121,8 +126,10 @@ export default class GuildManager extends Manager {
         let type: SettingType = overrideType ?? SettingType.STRING;
 
         if (!overrideType) {
-            if (typeof value === "number") type = SettingType.NUMBER;
+            if (typeof value === "string") type = SettingType.STRING;
+            else if (typeof value === "number") type = SettingType.NUMBER;
             else if (typeof value === "boolean") type = SettingType.BOOLEAN;
+            else throw "Must override the type when passing a snowflake";
         }
 
         await this.managers.bot.db.guildSetting.upsert({
@@ -133,7 +140,16 @@ export default class GuildManager extends Manager {
                 },
             },
             create: {
-                guildId: g.id,
+                guild: {
+                    connectOrCreate: {
+                        where: {
+                            id: g.id,
+                        },
+                        create: {
+                            id: g.id,
+                        },
+                    },
+                },
                 type,
                 value: { value },
                 name,
@@ -149,11 +165,14 @@ export default class GuildManager extends Manager {
 
     async getBasicSetting<Type extends SettingType>(
         guild: GuildResolvable,
-        name: string,
-        type: Type,
+        name: ValueOf<typeof guildSettingNames>,
+        type?: Type,
     ): Promise<
         boolean | string | number | (boolean | string | number)[] | undefined
     > {
+        if (!type && name in guildSettings)
+            type = guildSettings[name].type as Type;
+
         const setting = await this.getFullSetting(guild, name);
         if (!setting) {
             if (name in guildSettings) {
@@ -177,7 +196,7 @@ export default class GuildManager extends Manager {
 
     async getFancySetting<Type extends SettingType>(
         guild: GuildResolvable,
-        name: string,
+        name: keyof typeof guildSettingNames,
         type: Type,
     ) {
         const setting = await this.getFullSetting(guild, name);

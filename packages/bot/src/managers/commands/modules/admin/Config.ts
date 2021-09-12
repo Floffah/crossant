@@ -1,3 +1,5 @@
+import { SettingType } from "@prisma/client";
+import { stripIndents } from "common-tags";
 import { APIMessage } from "discord-api-types/v9";
 import {
     GuildChannel,
@@ -5,10 +7,12 @@ import {
     MessageActionRow,
     MessageButton,
 } from "discord.js";
+import { ManagerNames } from "src/managers/commands/managers";
 import IncomingSlashCommand from "src/managers/commands/structures/IncomingSlashCommand";
 import SlashCommand from "src/managers/commands/structures/SlashCommand";
 import { defaultEmbed } from "src/util/embeds";
-import { guildSettings } from "src/util/settings";
+import { guildSettingNames, guildSettings } from "src/util/settings";
+import { ValueOf } from "src/util/types";
 
 export default class ConfigCommand extends SlashCommand {
     constructor() {
@@ -67,8 +71,8 @@ export default class ConfigCommand extends SlashCommand {
                         )
                         .addIntegerOption((o) =>
                             o
-                                .setName("int")
-                                .setDescription("Value as an integer"),
+                                .setName("number")
+                                .setDescription("Value as a number"),
                         )
                         .addChannelOption((o) =>
                             o
@@ -91,6 +95,113 @@ export default class ConfigCommand extends SlashCommand {
         const sub = i.options.getSubcommand(true);
 
         if (sub === "list") await this.listCommand(i);
+        else if (sub === "info") await this.infoCommand(i);
+        else if (sub === "set") await this.setCommand(i);
+    }
+
+    async setCommand(i: IncomingSlashCommand) {
+        if (!i.member || !i.guild)
+            throw "This command can only be used in a guild";
+        console.log(1);
+
+        const entryName = i.options.getString("entry", true) as ValueOf<
+            typeof guildSettingNames
+        >;
+        console.log(2);
+
+        if (!(entryName in guildSettings))
+            throw "Config entry not found. If you think this was a mistake, try again in a few minutes to let the bot update everywhere";
+        console.log(3);
+
+        const entry = guildSettings[entryName];
+
+        if (entry.permission && !i.member.permissions.has(entry.permission))
+            throw "No permission";
+        console.log(4);
+
+        let value: any;
+
+        if (entry.type === SettingType.BOOLEAN)
+            value = i.options.getBoolean("boolean", true);
+        else if (entry.type === SettingType.NUMBER)
+            value = i.options.getInteger("number", true);
+        else if (entry.type === SettingType.CHANNEL)
+            value = i.options.getChannel("channel", true).id;
+        else if (entry.type === SettingType.USER)
+            value = i.options.getUser("user", true).id;
+        else if (entry.type === SettingType.ROLE)
+            value = i.options.getRole("role", true).id;
+        else value = i.options.getString("string", true);
+        console.log(5);
+
+        const guilds = this.module.managers.get(ManagerNames.GuildManager);
+        if (!guilds) throw "No guild manager";
+        console.log(6);
+
+        await guilds.setSetting(i.guild, entryName, value, entry.type);
+        console.log(7);
+
+        await i.reply(`${entryName} is now set to \`${value}\``);
+    }
+
+    async infoCommand(i: IncomingSlashCommand) {
+        const entryName = i.options.getString("entry", true) as ValueOf<
+            typeof guildSettingNames
+        >;
+
+        if (!(entryName in guildSettings))
+            throw "Config entry not found. If you think this was a mistake, try again in a few minutes to let the bot update everywhere";
+
+        const entry = guildSettings[entryName];
+
+        await i.reply({
+            embeds: [
+                defaultEmbed()
+                    .setTitle(`${entryName}`)
+                    .setDescription(
+                        stripIndents`
+                        To change this setting, run \`/config set ${entryName} ${entry.type.toLowerCase()}:${
+                            entry.arrayType
+                                ? "some_value,another_value"
+                                : "some_value"
+                        }\`
+                        To see all settings, run \`/config list\`
+                    `,
+                    )
+                    .addField(
+                        "Info",
+                        stripIndents`
+                        **Description**: ${entry.description} ${
+                            entry.defaultValue
+                                ? `\n**Default**: ${entry.defaultValue}`
+                                : ""
+                        }
+                        **Type**: ${entry.type.toLowerCase()}${
+                            entry.arrayType
+                                ? " (array, separate with a comma)"
+                                : ""
+                        }
+                        ${
+                            entry.permission
+                                ? `**Permission needed**: ${entry.permission
+                                      .toLowerCase()
+                                      .replace("_", " ")} ${
+                                      i.member
+                                          ? `(You ${
+                                                i.member.permissions.has(
+                                                    entry.permission,
+                                                )
+                                                    ? "**do**"
+                                                    : "**don't**"
+                                            } have permission to alter this setting)`
+                                          : ""
+                                  }`
+                                : ""
+                        }
+                    `,
+                    ),
+            ],
+        });
     }
 
     async listCommand(i: IncomingSlashCommand) {
@@ -116,7 +227,7 @@ export default class ConfigCommand extends SlashCommand {
                 if (keys[i]) {
                     const setting = guildSettings[keys[i]];
 
-                    list += ` - **\`${keys[i]}:\`** ${
+                    list += ` - **\`${keys[i]}\`:** ${
                         setting.description
                     } **Type:** \`${setting.type.toLowerCase()}\`, **Default:** \`${
                         setting.defaultValue

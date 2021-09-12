@@ -1,7 +1,9 @@
 import { Message, MessageEmbed } from "discord.js";
+import { ManagerNames } from "src/managers/commands/managers";
 import InfoCommand from "src/managers/commands/modules/util/Info";
 import PingMessageCommand from "src/managers/commands/modules/util/PingMessage";
 import { defaultEmbed } from "src/util/embeds";
+import { guildSettingNames } from "src/util/settings";
 import Module from "../structures/Module";
 import HelpCommand from "./util/Help";
 
@@ -22,6 +24,15 @@ export default class UtilModule extends Module {
 
     async message(m: Message) {
         if (m.guild && m.mentions.members) {
+            const guilds = this.managers.get(ManagerNames.GuildManager);
+            if (!guilds) return;
+
+            const pmsg = (await guilds.getBasicSetting(
+                m.guild,
+                guildSettingNames.PingMessageEnabled,
+            )) as boolean;
+            if (!pmsg) return;
+
             const pingmsgs = await this.managers.bot.db.pingMessage.findMany({
                 where: {
                     guildId: m.guild.id,

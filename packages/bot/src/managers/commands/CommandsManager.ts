@@ -122,7 +122,7 @@ export default class CommandsManager extends Manager {
         await this.managers.bot.rest.put(
             Routes.applicationCommands(this.managers.bot.client.application.id),
             {
-                body: commands,
+                body: this.managers.bot.debugmode ? [] : commands,
             },
         );
 
