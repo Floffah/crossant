@@ -11,7 +11,12 @@ import { ManagerNames } from "src/managers/commands/managers";
 import IncomingSlashCommand from "src/managers/commands/structures/IncomingSlashCommand";
 import SlashCommand from "src/managers/commands/structures/SlashCommand";
 import { defaultEmbed } from "src/util/embeds";
-import { guildSettingNames, guildSettings } from "src/util/settings";
+import { carefulSplit } from "src/util/sanitize";
+import {
+    guildSettingNames,
+    guildSettings,
+    settingParsers,
+} from "src/util/settings";
 import { ValueOf } from "src/util/types";
 
 export default class ConfigCommand extends SlashCommand {
@@ -85,6 +90,13 @@ export default class ConfigCommand extends SlashCommand {
                         .addRoleOption((o) =>
                             o.setName("role").setDescription("Value as a role"),
                         ),
+                )
+                .addSubcommand((c) =>
+                    c
+                        .setName("help")
+                        .setDescription(
+                            "Show a full help menu with all information about using configs",
+                        ),
                 );
 
             return s;
@@ -97,6 +109,38 @@ export default class ConfigCommand extends SlashCommand {
         if (sub === "list") await this.listCommand(i);
         else if (sub === "info") await this.infoCommand(i);
         else if (sub === "set") await this.setCommand(i);
+        else if (sub === "help") await this.helpCommand(i);
+    }
+
+    async helpCommand(i: IncomingSlashCommand) {
+        await i.reply({
+            embeds: [
+                defaultEmbed()
+                    .setTitle("Config help")
+                    .setDescription(
+                        "Configs are quite a complicated system, but since Crossant is moving towards being fully slash commands (message commands will be disabled soon), some parts of it are easy and intuitive " +
+                            "but others are hard. After reading this you should have a pretty decent idea of how to use configs",
+                    )
+                    .addField(
+                        "Getting information",
+                        "To see what config entries are available, you can do `/config list entry:name` or to see info about a specific setting (and if you have permission to change it, `/config info entry:name`",
+                    )
+                    .addField(
+                        "Basic values",
+                        "Changing the value of settings is where it starts getting complicated. The `/config info` command gives you copy and pasteable command that you just need to change the value of.\n" +
+                            "If the setting **isn't** an array, it is just a case of `/config set entry:name setting_type:setting_value`. e.g, for a boolean, `/config set entry:name boolean:value`. Don't worry, if you get the type wrong, the bot will tell you!",
+                    )
+                    .addField(
+                        "Arrays",
+                        "If the setting **is** an array, you have to always use the string type. The bot will try to make sense of this as best it can. To separate values you use a comma (no space). " +
+                            "For a boolean value, you could use `y,yes,true,false,f,no,n` as a value, or for a number value you could use `1,53,124,134.12`",
+                    )
+                    .addField(
+                        "Compatibility",
+                        '"Wait! But what if I need a comma in my value??". Don\'t worry, we thought of this! Simply put a backslash (\\ not /) in front of the comma (on some devices its a double backslash). For example, `first value, second\\, value` would be interpreted as `["first value", "second, value"]`',
+                    ),
+            ],
+        });
     }
 
     async setCommand(i: IncomingSlashCommand) {
@@ -117,7 +161,19 @@ export default class ConfigCommand extends SlashCommand {
 
         let value: any;
 
-        if (entry.type === SettingType.BOOLEAN)
+        if (entry.arrayType) {
+            const str = i.options.getString("string", true);
+            const parts = carefulSplit(str, ",");
+
+            const final: any[] = [];
+            const parserfn = settingParsers[entry.type];
+
+            for (const part of parts) {
+                final.push(parserfn(part));
+            }
+
+            value = final;
+        } else if (entry.type === SettingType.BOOLEAN)
             value = i.options.getBoolean("boolean", true);
         else if (entry.type === SettingType.NUMBER)
             value = i.options.getInteger("number", true);
@@ -134,7 +190,11 @@ export default class ConfigCommand extends SlashCommand {
 
         await guilds.setSetting(i.guild, entryName, value, entry.type);
 
-        await i.reply(`${entryName} is now set to \`${value}\``);
+        await i.reply(
+            `${entryName} is now set to \`${
+                Array.isArray(value) ? `["${value.join('", "')}"]` : value
+            }\``,
+        );
     }
 
     async infoCommand(i: IncomingSlashCommand) {
@@ -153,10 +213,10 @@ export default class ConfigCommand extends SlashCommand {
                     .setTitle(`${entryName}`)
                     .setDescription(
                         stripIndents`
-                        To change this setting, run \`/config set ${entryName} ${entry.type.toLowerCase()}:${
+                        To change this setting, run \`/config set ${entryName} ${
                             entry.arrayType
-                                ? "some_value,another_value"
-                                : "some_value"
+                                ? "string:some_value,another_value"
+                                : `${entry.type.toLowerCase()}:some_value`
                         }\`
                         To see all settings, run \`/config list\`
                     `,
@@ -220,11 +280,13 @@ export default class ConfigCommand extends SlashCommand {
                 if (keys[i]) {
                     const setting = guildSettings[keys[i]];
 
-                    list += ` - **\`${keys[i]}\`:** ${
+                    list += ` **•** **\`${keys[i]}\`:** ${
                         setting.description
-                    } **Type:** \`${setting.type.toLowerCase()}\`, **Default:** \`${
+                    }\n     **Type:** \`${setting.type.toLowerCase()}\`, ${
                         setting.defaultValue
-                    }\`${
+                            ? `**Default:** \`${setting.defaultValue}\``
+                            : "no defaults"
+                    }${
                         setting.permission
                             ? `, **Permission:** \`${setting.permission}\``
                             : ""

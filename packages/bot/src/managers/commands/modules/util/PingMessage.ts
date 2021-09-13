@@ -2,6 +2,7 @@ import { ManagerNames } from "src/managers/commands/managers";
 import IncomingSlashCommand from "src/managers/commands/structures/IncomingSlashCommand";
 import SlashCommand from "src/managers/commands/structures/SlashCommand";
 import { defaultEmbed } from "src/util/embeds";
+import { censorWord } from "src/util/sanitize";
 import { guildSettingNames } from "src/util/settings";
 
 export default class PingMessageCommand extends SlashCommand {
@@ -59,10 +60,25 @@ export default class PingMessageCommand extends SlashCommand {
 
         if (!pmsg) throw "Ping messages are disabled in this guild";
 
+        const badwords = (await guilds.getBasicSetting(
+            i.guild,
+            guildSettingNames.PingMessageBlacklist,
+        )) as string[];
+
         const message = `<@${i.user.id}> is ${i.options.getString(
             "message",
             true,
         )}`;
+
+        if (badwords) {
+            for (const word of badwords) {
+                if (message.toLowerCase().includes(word.toLowerCase()))
+                    throw `Word \`${censorWord(
+                        word,
+                    )}\` is not allowed in a ping message`;
+            }
+        }
+
         await this.module.managers.bot.db.pingMessage.upsert({
             where: {
                 userId_guildId: {
