@@ -1,11 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind screens;
+@tailwind variants;
 @tailwind utilities;
 
 body, html {
     text-rendering: optimizeLegibility;
-    image-rendering: high-quality;
+    image-rendering: optimizeQuality;
     color-rendering: optimizeQuality;
     shape-rendering: geometricPrecision;
 }
@@ -45,5 +46,13 @@ a:active {
         transform: translateY(-50%);
         top: 50%;
         position: absolute;
+    }
+    @media screen(sm) {
+        .translate-none {
+            transform: unset;
+            position: relative;
+            left: unset;
+            top: unset;
+        }
     }
 }

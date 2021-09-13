@@ -26,7 +26,8 @@
         "dev:bot": "yarn workspace crossant tsup --watch --minify",
         "dev:run": "node packages/bot/dist/cli.js run --debug",
         "dev:rawrun": "node packages/bot/dist/shardstart.js --debug",
-        "dev:web": "yarn workspace crossant-web next dev"
+        "dev:web": "yarn workspace crossant-web next dev",
+        "prod:prepare": "git pull && yarn prisma migrate deploy && yarn prisma migrate && yarn workspace crossant tsup --minify"
     },
     "packageManager": "yarn@3.0.2"
 }

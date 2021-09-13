@@ -1,4 +1,5 @@
 import { withTRPC } from "@trpc/next";
+import { Provider } from "next-auth/client";
 import { DefaultSeo } from "next-seo";
 import { AppProps } from "next/app";
 import React from "react";
@@ -6,7 +7,7 @@ import ErrorBoundary from "src/components/util/ErrorBoundary";
 import { AppRouter } from "src/lib/api/router";
 import RenderSaver from "../components/util/RenderSaver";
 
-import "src/styles/common.css";
+import "src/styles/styles.css";
 
 function App(p: AppProps) {
     return (
@@ -22,25 +23,13 @@ function App(p: AppProps) {
 
 const TRPCApp = withTRPC<AppRouter>({
     config: (_c) => {
-        const url = process.env.VERCEL_URL
-            ? `https://${process.env.VERCEL_URL}/api/trpc`
-            : "http://localhost:3000/api/trpc";
-
-        // let pswd: string | undefined = undefined;
-        //
-        // if (
-        //     typeof localStorage !== "undefined" &&
-        //     localStorage.getItem(APIAccessName)
-        // )
-        //     pswd = localStorage.getItem(APIAccessName) as string;
+        const url =
+            process.env.NODE_ENV === "production"
+                ? `https://crossant.floffah.dev/api/trpc`
+                : "http://localhost:3000/api/trpc";
 
         return {
             url,
-            // headers: pswd
-            //     ? {
-            //         AUTHORIZATION: pswd,
-            //     }
-            //     : {},
         };
     },
     ssr: true,
@@ -49,9 +38,11 @@ const TRPCApp = withTRPC<AppRouter>({
 export default function BoundariedApp(p: AppProps) {
     return (
         <ErrorBoundary>
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-            {/* @ts-ignore */}
-            <TRPCApp {...p} />
+            <Provider>
+                {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                {/* @ts-ignore */}
+                <TRPCApp {...p} />
+            </Provider>
         </ErrorBoundary>
     );
 }

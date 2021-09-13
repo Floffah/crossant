@@ -1,4 +1,4 @@
-import React from "react";
+// eslint-disable-next-line @next/next/no-document-import-in-page
 import Document, {
     DocumentContext,
     Head,
@@ -6,6 +6,7 @@ import Document, {
     Main,
     NextScript,
 } from "next/document";
+import React from "react";
 import { ServerStyleSheet } from "styled-components";
 
 export default class MyDocument extends Document {
@@ -16,8 +17,10 @@ export default class MyDocument extends Document {
         try {
             ctx.renderPage = () =>
                 originalRenderPage({
-                    enhanceApp: (App) => (props) =>
-                        sheet.collectStyles(<App {...props} />),
+                    enhanceApp: (App) =>
+                        function collectedApp(props: any) {
+                            return sheet.collectStyles(<App {...props} />);
+                        },
                 });
 
             const initialProps = await Document.getInitialProps(ctx);

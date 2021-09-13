@@ -1,4 +1,4 @@
-module.exports = require("next-transpile-modules")(["crypto-random-string"])({
+module.exports = require("next-transpile-modules")(["jotai"])({
     reactStrictMode: true,
     future: {
         modern: true,
