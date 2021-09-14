@@ -34,6 +34,8 @@ export const guildSettingNames = {
     // pingMessage
     PingMessageEnabled: "pingMessage.enabled",
     PingMessageBlacklist: "pingMessage.blacklist",
+    VerificationEnabled: "verification.enabled",
+    VerificationChannel: "verification.channel",
 };
 
 export const guildSettings: {
@@ -53,5 +55,16 @@ export const guildSettings: {
         arrayType: true,
         description: "An array of words that cannot be used in a ping message",
         permission: "MANAGE_MESSAGES",
+    },
+    [guildSettingNames.VerificationEnabled]: {
+        type: SettingType.BOOLEAN,
+        description: "Whether or not verification is enabled in this server",
+        defaultValue: false,
+        permission: "MANAGE_CHANNELS",
+    },
+    [guildSettingNames.VerificationChannel]: {
+        type: SettingType.CHANNEL,
+        description: "The channel people should be verified in",
+        permission: "MANAGE_CHANNELS",
     },
 };

@@ -19,7 +19,14 @@ import {
 } from "src/util/settings";
 import { ValueOf } from "src/util/types";
 
+const mappedSettings = Object.keys(guildSettings).map((s) => [s, s]) as [
+    string,
+    string,
+][];
+
 export default class ConfigCommand extends SlashCommand {
+    perPage = 3;
+
     constructor() {
         super("config", "Configure the bot for your server", (s) => {
             s.addSubcommand((c) =>
@@ -40,12 +47,7 @@ export default class ConfigCommand extends SlashCommand {
                                 .setName("entry")
                                 .setDescription("Name of the config entry")
                                 .setRequired(true)
-                                .addChoices(
-                                    Object.keys(guildSettings).map((s) => [
-                                        s,
-                                        s,
-                                    ]),
-                                ),
+                                .addChoices(mappedSettings),
                         ),
                 )
                 .addSubcommand((c) =>
@@ -57,12 +59,7 @@ export default class ConfigCommand extends SlashCommand {
                                 .setName("entry")
                                 .setDescription("Name of the config entry")
                                 .setRequired(true)
-                                .addChoices(
-                                    Object.keys(guildSettings).map((s) => [
-                                        s,
-                                        s,
-                                    ]),
-                                ),
+                                .addChoices(mappedSettings),
                         )
                         .addStringOption((o) =>
                             o
@@ -97,6 +94,18 @@ export default class ConfigCommand extends SlashCommand {
                         .setDescription(
                             "Show a full help menu with all information about using configs",
                         ),
+                )
+                .addSubcommand((c) =>
+                    c
+                        .setName("get")
+                        .setDescription("Get the current value of a setting")
+                        .addStringOption((o) =>
+                            o
+                                .setName("entry")
+                                .setDescription("Name of the config entry")
+                                .setRequired(true)
+                                .addChoices(mappedSettings),
+                        ),
                 );
 
             return s;
@@ -110,6 +119,56 @@ export default class ConfigCommand extends SlashCommand {
         else if (sub === "info") await this.infoCommand(i);
         else if (sub === "set") await this.setCommand(i);
         else if (sub === "help") await this.helpCommand(i);
+        else if (sub === "get") await this.getCommand(i);
+    }
+
+    async getCommand(i: IncomingSlashCommand) {
+        if (!i.member || !i.guild)
+            throw "This command can only be used in a guild";
+
+        const entryName = i.options.getString("entry", true) as ValueOf<
+            typeof guildSettingNames
+        >;
+
+        if (!(entryName in guildSettings))
+            throw "Config entry not found. If you think this was a mistake, try again in a few minutes to let the bot update everywhere";
+
+        const entry = guildSettings[entryName];
+
+        if (entry.permission && !i.member.permissions.has(entry.permission))
+            throw "No permission";
+
+        const guilds = this.module.managers.get(ManagerNames.GuildManager);
+        if (!guilds) throw "No guild manager";
+
+        const setting = await guilds.getFullSetting(i.guild, entryName);
+
+        if (!setting || setting.value) {
+            await i.reply({
+                embeds: [
+                    defaultEmbed()
+                        .setTitle(entryName)
+                        .setDescription(
+                            `This setting hasn't been set for this server yet${
+                                typeof entry.defaultValue !== "undefined"
+                                    ? `, however, it does have a default value of ${entry.defaultValue} which the bot will use in place.`
+                                    : "."
+                            }`,
+                        ),
+                ],
+            });
+            return;
+        }
+
+        await i.reply({
+            embeds: [
+                defaultEmbed()
+                    .setTitle(entryName)
+                    .setDescription(
+                        `The current value of this setting for this guild is: \`${setting.value}\``,
+                    ),
+            ],
+        });
     }
 
     async helpCommand(i: IncomingSlashCommand) {
@@ -225,7 +284,7 @@ export default class ConfigCommand extends SlashCommand {
                         "Info",
                         stripIndents`
                         **Description**: ${entry.description} ${
-                            entry.defaultValue
+                            typeof entry.defaultValue !== "undefined"
                                 ? `\n**Default**: ${entry.defaultValue}`
                                 : ""
                         }
@@ -273,8 +332,8 @@ export default class ConfigCommand extends SlashCommand {
                 "Use the buttons below to navigate the page\n\n";
 
             for (
-                let i = currentPage * 10 - 1;
-                i < (currentPage + 1) * 10;
+                let i = currentPage * this.perPage;
+                i < (currentPage + 1) * this.perPage;
                 i++
             ) {
                 if (keys[i]) {
@@ -283,7 +342,7 @@ export default class ConfigCommand extends SlashCommand {
                     list += ` **•** **\`${keys[i]}\`:** ${
                         setting.description
                     }\n     **Type:** \`${setting.type.toLowerCase()}\`, ${
-                        setting.defaultValue
+                        typeof setting.defaultValue !== "undefined"
                             ? `**Default:** \`${setting.defaultValue}\``
                             : "no defaults"
                     }${
@@ -296,7 +355,9 @@ export default class ConfigCommand extends SlashCommand {
 
             embed.setDescription(list);
             embed.setFooter(
-                `Page ${currentPage + 1}/${Math.ceil(keys.length / 10)}`,
+                `Page ${currentPage + 1}/${Math.ceil(
+                    keys.length / this.perPage,
+                )}`,
             );
 
             const buttons = new MessageActionRow({
@@ -313,7 +374,8 @@ export default class ConfigCommand extends SlashCommand {
                         customId: "next",
                         label: "Next",
                         emoji: "➡️",
-                        disabled: keys.length > currentPage * 10,
+                        disabled:
+                            keys.length <= (currentPage + 1) * this.perPage,
                     }),
                 ],
             });
@@ -342,8 +404,10 @@ export default class ConfigCommand extends SlashCommand {
             });
 
             if (component) {
+                await component.reply(`${component.customId}`);
                 if (component.customId === "previous") currentPage--;
                 else if (component.customId === "next") currentPage++;
+                await component.deleteReply();
                 await calcPage();
             }
         };

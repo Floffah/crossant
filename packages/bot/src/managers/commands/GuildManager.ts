@@ -177,7 +177,7 @@ export default class GuildManager extends Manager {
         if (!setting) {
             if (name in guildSettings) {
                 const s = guildSettings[name];
-                if (s.type === type)
+                if (typeof s.defaultValue !== "undefined" && s.type === type)
                     return s.defaultValue as SettingTypesMap[Type];
                 else return undefined;
             } else return undefined;
