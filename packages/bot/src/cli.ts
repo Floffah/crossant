@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
+import AppManager from "src/sharding/AppManager";
 import Crossant from "./bot/Crossant";
 import initCommand from "./commands/init";
-import { startShards } from "./util/shards";
+import { startShards } from "src/sharding/legacyshards";
 
 const pkg = require("../package.json");
 
@@ -22,7 +23,7 @@ program
     .action((opts) => {
         if (opts.debug) process.env.NODE_ENV = "development";
         if (opts.shard) {
-            startShards();
+            new AppManager().init(opts);
         } else {
             new Crossant().init(opts);
         }

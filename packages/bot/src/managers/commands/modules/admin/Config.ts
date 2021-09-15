@@ -7,17 +7,17 @@ import {
     MessageActionRow,
     MessageButton,
 } from "discord.js";
-import { ManagerNames } from "src/managers/commands/managers";
+import { ManagerNames } from "src/managers/common/managers";
 import IncomingSlashCommand from "src/managers/commands/structures/IncomingSlashCommand";
 import SlashCommand from "src/managers/commands/structures/SlashCommand";
-import { defaultEmbed } from "src/util/embeds";
-import { carefulSplit } from "src/util/sanitize";
+import { defaultEmbed } from "src/util/messages/embeds";
+import { carefulSplit } from "src/util/messages/sanitize";
 import {
     guildSettingNames,
     guildSettings,
     settingParsers,
-} from "src/util/settings";
-import { ValueOf } from "src/util/types";
+} from "src/settings/settings";
+import { ValueOf } from "src/util/types/utils";
 
 const mappedSettings = Object.keys(guildSettings).map((s) => [s, s]) as [
     string,

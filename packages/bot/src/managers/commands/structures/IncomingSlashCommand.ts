@@ -6,7 +6,7 @@ import {
     Message,
     MessageOptions,
 } from "discord.js";
-import ManagersManager from "../../ManagersManager";
+import ManagersManager from "src/managers/common/ManagersManager";
 import { CommandType } from "./BaseCommand";
 import IncomingBaseCommand from "./IncomingBaseCommand";
 import SlashCommand, { SlashCommandType } from "./SlashCommand";

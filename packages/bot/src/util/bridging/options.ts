@@ -13,7 +13,7 @@ import {
     Snowflake,
     User,
 } from "discord.js";
-import { ApplicationCommandOptionType } from "src/util/djs/enums";
+import { ApplicationCommandOptionType } from "src/util/types/enums";
 
 export function optionKeyName(i: number) {
     return Object.keys(ApplicationCommandOptionType)[

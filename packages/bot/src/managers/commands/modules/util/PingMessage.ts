@@ -1,9 +1,9 @@
-import { ManagerNames } from "src/managers/commands/managers";
+import { ManagerNames } from "src/managers/common/managers";
 import IncomingSlashCommand from "src/managers/commands/structures/IncomingSlashCommand";
 import SlashCommand from "src/managers/commands/structures/SlashCommand";
-import { defaultEmbed } from "src/util/embeds";
-import { censorWord } from "src/util/sanitize";
-import { guildSettingNames } from "src/util/settings";
+import { defaultEmbed } from "src/util/messages/embeds";
+import { censorWord } from "src/util/messages/sanitize";
+import { guildSettingNames } from "src/settings/settings";
 
 export default class PingMessageCommand extends SlashCommand {
     constructor() {

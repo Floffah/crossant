@@ -9,7 +9,7 @@ import {
 } from "discord.js";
 import BoardCommand from "src/managers/commands/modules/board/Board";
 import Module from "src/managers/commands/structures/Module";
-import { defaultEmbed } from "src/util/embeds";
+import { defaultEmbed } from "src/util/messages/embeds";
 
 export default class BoardsModule extends Module {
     constructor() {

@@ -1,11 +1,11 @@
 import { stripIndents } from "common-tags";
 import { APIApplicationCommandOption } from "discord-api-types";
 import { APIApplicationCommandSubCommandOptions } from "discord-api-types/v9";
-import { ManagerNames } from "src/managers/commands/managers";
+import { ManagerNames } from "src/managers/common/managers";
 import { CommandName } from "src/managers/commands/structures/BaseCommand";
-import { ApplicationCommandOptionType } from "src/util/djs/enums";
-import { defaultEmbed } from "src/util/embeds";
-import { optionsToUsage } from "src/util/options";
+import { ApplicationCommandOptionType } from "src/util/types/enums";
+import { defaultEmbed } from "src/util/messages/embeds";
+import { optionsToUsage } from "src/util/bridging/options";
 import IncomingSlashCommand from "../../structures/IncomingSlashCommand";
 import SlashCommand from "../../structures/SlashCommand";
 

@@ -2,7 +2,7 @@ import { stripIndents } from "common-tags";
 import prettyMilliseconds from "pretty-ms";
 import IncomingSlashCommand from "src/managers/commands/structures/IncomingSlashCommand";
 import SlashCommand from "src/managers/commands/structures/SlashCommand";
-import { defaultEmbed } from "src/util/embeds";
+import { defaultEmbed } from "src/util/messages/embeds";
 
 const pkg = require("../../../../../package.json");
 

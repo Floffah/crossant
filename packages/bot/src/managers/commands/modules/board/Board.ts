@@ -2,7 +2,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { GuildChannel } from "discord.js";
 import IncomingSlashCommand from "src/managers/commands/structures/IncomingSlashCommand";
 import SlashCommand from "src/managers/commands/structures/SlashCommand";
-import { defaultEmbed } from "src/util/embeds";
+import { defaultEmbed } from "src/util/messages/embeds";
 
 export default class BoardCommand extends SlashCommand {
     constructor() {

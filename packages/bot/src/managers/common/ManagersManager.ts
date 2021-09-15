@@ -1,10 +1,10 @@
 import { EventEmitter } from "events";
-import GuildManager from "src/managers/commands/GuildManager";
-import { ManagerNames, ManagerTypes } from "src/managers/commands/managers";
+import GuildManager from "src/managers/guilds/GuildManager";
+import { ManagerNames, ManagerTypes } from "src/managers/common/managers";
 import TypedEventEmitter from "typed-emitter";
-import Crossant from "../bot/Crossant";
-import CommandsManager from "./commands/CommandsManager";
-import Manager from "./Manager";
+import Crossant from "src/bot/Crossant";
+import CommandsManager from "src/managers/commands/CommandsManager";
+import Manager from "src/managers/common/Manager";
 
 export interface ManagersManagerEvents {
     load: () => void;

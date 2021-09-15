@@ -7,8 +7,8 @@ import { existsSync, readFileSync } from "fs";
 import { parse } from "ini";
 import { resolve } from "path";
 import pluralize from "pluralize";
-import { defaultEmbed } from "src/util/embeds";
-import { ShardMessage } from "src/util/shardmessages";
+import { defaultEmbed } from "src/util/messages/embeds";
+import { ShardMessage } from "src/sharding/shardmessages";
 
 const keypress = require("keypress");
 

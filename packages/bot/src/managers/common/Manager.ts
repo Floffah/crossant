@@ -1,5 +1,5 @@
-import { ManagerNames } from "src/managers/commands/managers";
-import ManagersManager from "./ManagersManager";
+import { ManagerNames } from "src/managers/common/managers";
+import ManagersManager from "src/managers/common/ManagersManager";
 
 export default abstract class Manager {
     managers: ManagersManager;

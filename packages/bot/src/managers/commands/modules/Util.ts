@@ -1,9 +1,9 @@
 import { Message, MessageEmbed } from "discord.js";
-import { ManagerNames } from "src/managers/commands/managers";
+import { ManagerNames } from "src/managers/common/managers";
 import InfoCommand from "src/managers/commands/modules/util/Info";
 import PingMessageCommand from "src/managers/commands/modules/util/PingMessage";
-import { defaultEmbed } from "src/util/embeds";
-import { guildSettingNames } from "src/util/settings";
+import { defaultEmbed } from "src/util/messages/embeds";
+import { guildSettingNames } from "src/settings/settings";
 import Module from "../structures/Module";
 import HelpCommand from "./util/Help";
 

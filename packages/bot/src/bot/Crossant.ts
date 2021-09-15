@@ -1,18 +1,15 @@
 import { REST } from "@discordjs/rest";
 import { PrismaClient } from "@prisma/client";
-import { init, Integrations } from "@sentry/node";
-import axios from "axios";
 import chalk from "chalk";
 import { ActivityOptions, Client } from "discord.js";
-import execa from "execa";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { parse, stringify } from "ini";
 import { render } from "mustache";
 import { resolve } from "path";
 import "source-map-support/register";
-import ManagersManager from "../managers/ManagersManager";
-import { Config } from "../util/config";
-import Logger from "../util/Logger";
+import { Config } from "src/config/config";
+import ManagersManager from "src/managers/common/ManagersManager";
+import Logger from "src/util/logging/Logger";
 
 require("dotenv").config();
 
@@ -112,63 +109,6 @@ export default class Crossant {
                     )}`,
                 );
             } else this.logger.info("Sharding disabled");
-
-            if (this.config.sentry && !this.debugmode) {
-                const lastCommitSha = this.config.sentry?.lastCommit;
-
-                let command =
-                    "git --no-pager log --no-merges --no-color --pretty=%H";
-
-                if (lastCommitSha) command += ` ${lastCommitSha}...HEAD`;
-
-                const commitscmd = `${
-                    execa.commandSync(command, {
-                        stdio: "pipe",
-                        cwd: process.cwd(),
-                        env: process.env,
-                    }).stdout
-                }`
-                    .split("\n")
-                    .filter((v) => !/^\s*$/.test(v));
-
-                if (commitscmd.length > 0) {
-                    const commits = commitscmd.map((c) => ({
-                        id: c,
-                        repository: "Floffah/crossant",
-                    }));
-
-                    this.config.sentry.lastCommit = commitscmd[0];
-                    this.writeConfig();
-
-                    await axios.post(
-                        this.config.sentry.releases,
-                        {
-                            commits,
-                            version: commitscmd[0],
-                            projects: ["crossant-shard"],
-                        },
-                        {
-                            headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `Bearer ${this.config.sentry.authToken}`,
-                            },
-                        },
-                    );
-                }
-
-                init({
-                    dsn: this.config.sentry.dsn,
-                    tracesSampleRate: 1,
-                    environment: this.debugmode ? "development" : "production",
-                    integrations: [
-                        new Integrations.OnUncaughtException(),
-                        new Integrations.OnUnhandledRejection(),
-                    ],
-                    release: require("../../package.json").version,
-                });
-
-                this.logger.info("Initialised sentry");
-            }
 
             this.db = new PrismaClient({
                 log: this.debugmode

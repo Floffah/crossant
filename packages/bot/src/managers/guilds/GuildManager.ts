@@ -6,15 +6,15 @@ import {
     GuildResolvable,
     Role,
 } from "discord.js";
-import { ManagerNames } from "src/managers/commands/managers";
-import Manager from "src/managers/Manager";
-import ManagersManager from "src/managers/ManagersManager";
+import { ManagerNames } from "src/managers/common/managers";
+import Manager from "src/managers/common/Manager";
+import ManagersManager from "src/managers/common/ManagersManager";
 import {
     guildSettingNames,
     guildSettings,
     SettingTypesMap,
-} from "src/util/settings";
-import { ValueOf } from "src/util/types";
+} from "src/settings/settings";
+import { ValueOf } from "src/util/types/utils";
 
 export default class GuildManager extends Manager {
     prefixes: { [k: string]: string | number } = {}; // snowflake -> prefix/last check returned none

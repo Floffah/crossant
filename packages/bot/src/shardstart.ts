@@ -1,3 +1,3 @@
-import { startShards } from "./util/shards";
+import AppManager from "src/sharding/AppManager";
 
-startShards();
+new AppManager().init({ debug: process.env.NODE_ENV === "development" });

@@ -1,6 +1,6 @@
 import { Routes } from "discord-api-types/v9";
 import { ApplicationCommandData, Interaction, Message } from "discord.js";
-import { ManagerNames } from "src/managers/commands/managers";
+import { ManagerNames } from "src/managers/common/managers";
 import AdminModule from "src/managers/commands/modules/Admin";
 import BoardsModule from "src/managers/commands/modules/Boards";
 import DevModule from "src/managers/commands/modules/Dev";
@@ -12,11 +12,11 @@ import Module from "src/managers/commands/structures/Module";
 import SlashCommand, {
     SlashCommandType,
 } from "src/managers/commands/structures/SlashCommand";
-import Manager from "src/managers/Manager";
-import ManagersManager from "src/managers/ManagersManager";
-import { ApplicationCommandTypes } from "src/util/djs/enums";
-import Logger from "src/util/Logger";
-import { parseToOptions } from "src/util/options";
+import Manager from "src/managers/common/Manager";
+import ManagersManager from "src/managers/common/ManagersManager";
+import { ApplicationCommandTypes } from "src/util/types/enums";
+import Logger from "src/util/logging/Logger";
+import { parseToOptions } from "src/util/bridging/options";
 import BaseCommand, {
     CommandName,
     CommandType,

@@ -1,4 +1,4 @@
-import { If } from "src/util/types";
+import { If } from "src/util/types/utils";
 import IncomingBaseCommand from "./IncomingBaseCommand";
 import Module from "./Module";
 

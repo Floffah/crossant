@@ -1,4 +1,4 @@
-import GuildManager from "src/managers/commands/GuildManager";
+import GuildManager from "src/managers/guilds/GuildManager";
 import CommandsManager from "src/managers/commands/CommandsManager";
 
 export enum ManagerNames {

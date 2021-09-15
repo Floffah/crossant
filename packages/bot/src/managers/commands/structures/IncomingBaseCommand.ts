@@ -13,8 +13,8 @@ import {
     ThreadChannel,
     User,
 } from "discord.js";
-import { If } from "src/util/types";
-import ManagersManager from "../../ManagersManager";
+import { If } from "src/util/types/utils";
+import ManagersManager from "src/managers/common/ManagersManager";
 import BaseCommand, { CommandType } from "./BaseCommand";
 import SlashCommand from "./SlashCommand";
 

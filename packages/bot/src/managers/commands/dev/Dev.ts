@@ -1,6 +1,6 @@
 import IncomingSlashCommand from "src/managers/commands/structures/IncomingSlashCommand";
 import SlashCommand from "src/managers/commands/structures/SlashCommand";
-import { ShardMessage } from "src/util/shardmessages";
+import { ShardMessage } from "src/sharding/shardmessages";
 
 export default class DevCommand extends SlashCommand {
     constructor() {
