@@ -350,7 +350,7 @@ export default class ConfigCommand extends SlashCommand {
 
                     list += ` **•** **\`${keys[i]}\`:** ${
                         setting.description
-                    }\n     **Type:** \`${setting.type.toLowerCase()}\`, ${
+                    }\n         **Type:** \`${setting.type.toLowerCase()}\`, ${
                         typeof setting.defaultValue !== "undefined"
                             ? `**Default:** \`${setting.defaultValue}\``
                             : "no defaults"
