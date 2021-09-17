@@ -35,6 +35,8 @@ export default class AppManager {
 
     shards: ShardingManager;
 
+    doSentry = false;
+
     readConfig() {
         this.config = parse(readFileSync(this.configpath, "utf-8")) as Config;
     }
@@ -79,6 +81,7 @@ export default class AppManager {
 
         if (this.config.sentry && !this.debugmode) {
             try {
+                this.doSentry = true;
                 const lastCommitSha = this.config.sentry?.lastCommit;
 
                 const dir = process.cwd();
@@ -135,7 +138,7 @@ export default class AppManager {
                             new Integrations.OnUncaughtException(),
                             new Integrations.OnUnhandledRejection(),
                         ],
-                        release: require("../../package.json").version,
+                        // release: require("../../package.json").version,
                     });
 
                     this.log("Initialised sentry");
@@ -146,6 +149,7 @@ export default class AppManager {
                     "There was a problem while updating sentry commits",
                     true,
                 );
+                this.doSentry = false;
             }
         }
 
@@ -154,7 +158,8 @@ export default class AppManager {
 
         this.shards = new ShardingManager(resolve(__dirname, "rawstart.js"), {
             totalShards: "auto",
-            mode: "worker",
+            // mode: "worker",
+            mode: "process", // YES I KNOW THIS IS VERY EXPENSIVE but the node i use can handle it and workers cannot be used until node-canvas supports worker threads!
             token: this.config.bot.token,
             respawn: true,
         });
@@ -219,7 +224,7 @@ export default class AppManager {
                 if (s.worker || s.process) s.kill();
             } catch (e) {
                 console.error(e);
-                captureException(e);
+                if (this.doSentry) captureException(e);
             }
         }
 
@@ -272,10 +277,10 @@ export default class AppManager {
                     await this.broadcastLog(`Respawned shard ${s.id}`);
                 } catch (e) {
                     console.error(e);
-                    captureException(e);
+                    if (this.doSentry) captureException(e);
                 }
             } catch (e) {
-                captureException(e);
+                if (this.doSentry) captureException(e);
                 this.log(`Shard ${s.id} failed to respawn. ${e.message}`, true);
                 faults.push(s.id);
 
@@ -283,14 +288,14 @@ export default class AppManager {
                     try {
                         s.kill();
                     } catch (e2) {
-                        captureException(e);
+                        if (this.doSentry) captureException(e);
                         //d
                     }
                 }
                 try {
                     this.shards.createShard(s.id);
                 } catch (e2) {
-                    captureException(e);
+                    if (this.doSentry) captureException(e);
                     // e
                 }
                 try {
@@ -302,7 +307,8 @@ export default class AppManager {
                         `Worst case scenario happened, failed to respawn shard ${s.id} and couldn't broadcast an error.\n${e}\n${e2}`,
                         true,
                     );
-                    captureException(e2);
+                    if (this.doSentry) captureException(e2);
+                    process.exit(0);
                 }
             }
         }
@@ -323,7 +329,7 @@ export default class AppManager {
         try {
             await this.broadcastLog(msg);
         } catch (e) {
-            captureException(e);
+            if (this.doSentry) captureException(e);
         }
     }
 
@@ -333,7 +339,7 @@ export default class AppManager {
                 s.kill();
             } catch (e) {
                 console.error(e);
-                captureException(e);
+                if (this.doSentry) captureException(e);
             }
         }
 
@@ -341,11 +347,15 @@ export default class AppManager {
     }
 
     async broadcastLog(msg: string) {
+        const channelID =
+            this.config.bot.broadcastLog === "disabled"
+                ? "879415229375717406"
+                : this.config.bot.broadcastLog;
         return await this.shards.broadcastEval(async (c) => {
             try {
-                const channel = (await c.channels.fetch(
-                    "879415229375717406",
-                )) as TextChannel | undefined;
+                const channel = (await c.channels.fetch(channelID)) as
+                    | TextChannel
+                    | undefined;
                 if (channel)
                     await channel.send({
                         embeds: [

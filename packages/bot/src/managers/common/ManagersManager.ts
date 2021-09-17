@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import GuildManager from "src/managers/guilds/GuildManager";
 import { ManagerNames, ManagerTypes } from "src/managers/common/managers";
+import VerificationManager from "src/managers/verification/VerificationManager";
 import TypedEventEmitter from "typed-emitter";
 import Crossant from "src/bot/Crossant";
 import CommandsManager from "src/managers/commands/CommandsManager";
@@ -28,6 +29,7 @@ class ManagersManager extends TypedEmitter {
         const raw: { new (manager: ManagersManager): Manager }[] = [
             CommandsManager,
             GuildManager,
+            VerificationManager,
         ];
 
         for (const manager of raw) {

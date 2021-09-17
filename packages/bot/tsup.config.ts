@@ -10,6 +10,8 @@ export const tsup: Options = {
         "winston",
         "terminal-kit",
         "@pm2/*",
+        "captcha-canvas",
+        "canvas",
     ],
     clean: true,
     splitting: true,

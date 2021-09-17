@@ -4,7 +4,6 @@ import { program } from "commander";
 import AppManager from "src/sharding/AppManager";
 import Crossant from "./bot/Crossant";
 import initCommand from "./commands/init";
-import { startShards } from "src/sharding/legacyshards";
 
 const pkg = require("../package.json");
 

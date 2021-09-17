@@ -4,7 +4,7 @@ datasource db {
 }
 
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 // auth
@@ -64,13 +64,16 @@ model DiscordUser {
   id String @id
 
   // settings
-  pingMessages PingMessage[]
+  pingMessages      PingMessage[]
+
+  // references
+  GuildVerification GuildVerification[]
 }
 
 model PingMessage {
-  user    DiscordUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    DiscordUser @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  String
-  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  guild   Guild       @relation(fields: [guildId], references: [id], onDelete: Cascade)
   guildId String
 
   message String
@@ -93,8 +96,9 @@ model Guild {
 
   // --
   // references
-  pingMessages PingMessage[]
-  settings     GuildSetting[]
+  pingMessages      PingMessage[]
+  settings          GuildSetting[]
+  GuildVerification GuildVerification[]
 }
 
 model GuildSetting {
@@ -107,6 +111,19 @@ model GuildSetting {
   arrayType Boolean     @default(false)
 
   @@id([guildId, name])
+}
+
+model GuildVerification {
+  guild   Guild       @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  guildId String
+  user    DiscordUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+
+  captchaValue String
+  createdAt DateTime @default(now())
+  sentMessageID String?
+
+  @@id([guildId, userId])
 }
 
 enum SettingType {

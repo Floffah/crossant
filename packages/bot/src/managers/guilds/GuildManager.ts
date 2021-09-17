@@ -6,8 +6,8 @@ import {
     GuildResolvable,
     Role,
 } from "discord.js";
-import { ManagerNames } from "src/managers/common/managers";
 import Manager from "src/managers/common/Manager";
+import { ManagerNames } from "src/managers/common/managers";
 import ManagersManager from "src/managers/common/ManagersManager";
 import {
     guildSettingNames,
@@ -49,19 +49,20 @@ export default class GuildManager extends Manager {
                 return this.managers.bot.config.bot.defaultPrefix;
         }
 
-        const dbguild = await this.managers.bot.db.guild.findUnique({
-            where: {
-                id: g.id,
-            },
-        });
-
-        if (!dbguild) {
-            this.prefixes[g.id] = Date.now();
+        const prefixsetting = (await this.getBasicSetting(
+            g,
+            guildSettingNames.BotPrefix,
+            SettingType.STRING,
+        )) as string | undefined;
+        if (
+            (prefixsetting &&
+                prefixsetting === this.managers.bot.config.bot.defaultPrefix) ||
+            !prefixsetting
+        )
             return this.managers.bot.config.bot.defaultPrefix;
-        }
 
-        this.prefixes[g.id] = dbguild.prefix;
-        return dbguild.prefix;
+        this.prefixes[g.id] = prefixsetting;
+        return prefixsetting;
     }
 
     async getFullSetting(
@@ -196,7 +197,7 @@ export default class GuildManager extends Manager {
 
     async getFancySetting<Type extends SettingType>(
         guild: GuildResolvable,
-        name: keyof typeof guildSettingNames,
+        name: ValueOf<typeof guildSettingNames>,
         type: Type,
     ) {
         const setting = await this.getFullSetting(guild, name);

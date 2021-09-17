@@ -7,16 +7,16 @@ import {
     MessageActionRow,
     MessageButton,
 } from "discord.js";
-import { ManagerNames } from "src/managers/common/managers";
 import IncomingSlashCommand from "src/managers/commands/structures/IncomingSlashCommand";
 import SlashCommand from "src/managers/commands/structures/SlashCommand";
-import { defaultEmbed } from "src/util/messages/embeds";
-import { carefulSplit } from "src/util/messages/sanitize";
+import { ManagerNames } from "src/managers/common/managers";
 import {
     guildSettingNames,
     guildSettings,
     settingParsers,
 } from "src/settings/settings";
+import { defaultEmbed } from "src/util/messages/embeds";
+import { carefulSplit } from "src/util/messages/sanitize";
 import { ValueOf } from "src/util/types/utils";
 
 const mappedSettings = Object.keys(guildSettings).map((s) => [s, s]) as [
@@ -236,13 +236,22 @@ export default class ConfigCommand extends SlashCommand {
             value = i.options.getBoolean("boolean", true);
         else if (entry.type === SettingType.NUMBER)
             value = i.options.getInteger("number", true);
-        else if (entry.type === SettingType.CHANNEL)
-            value = i.options.getChannel("channel", true).id;
-        else if (entry.type === SettingType.USER)
-            value = i.options.getUser("user", true).id;
-        else if (entry.type === SettingType.ROLE)
-            value = i.options.getRole("role", true).id;
-        else value = i.options.getString("string", true);
+        else if (entry.type === SettingType.CHANNEL) {
+            const opt = i.options.getChannel("channel", true).id;
+            if (!i.guild.channels.resolve(opt))
+                throw "Channel cannot be from another guild";
+            value = opt;
+        } else if (entry.type === SettingType.USER) {
+            const opt = i.options.getUser("user", true).id;
+            if (!i.guild.members.resolve(opt))
+                throw "User cannot be from another guild";
+            value = opt;
+        } else if (entry.type === SettingType.ROLE) {
+            const opt = i.options.getRole("role", true).id;
+            if (!i.guild.roles.resolve(opt))
+                throw "Role cannot be from another guild";
+            value = opt;
+        } else value = i.options.getString("string", true);
 
         const guilds = this.module.managers.get(ManagerNames.GuildManager);
         if (!guilds) throw "No guild manager";
