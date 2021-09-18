@@ -7,10 +7,11 @@ import {
     MessageAttachment,
     PartialGuildMember,
     Role,
+    TextBasedChannels,
     TextChannel,
 } from "discord.js";
 import Manager from "src/managers/common/Manager";
-import { ManagerNames } from "src/managers/common/managers";
+import { ManagerNames, ManagerTypes } from "src/managers/common/managers";
 import ManagersManager from "src/managers/common/ManagersManager";
 import { guildSettingNames } from "src/settings/settings";
 import { defaultEmbed } from "src/util/messages/embeds";
@@ -62,9 +63,25 @@ export default class VerificationManager extends Manager {
             });
     }
 
-    async onMemberJoin(m: GuildMember) {
-        const guilds = this.managers.get(ManagerNames.GuildManager);
-        if (!guilds) return;
+    async verifyMember(
+        m: GuildMember,
+        c: GuildChannel & TextBasedChannels,
+        guilds?: ManagerTypes[ManagerNames.GuildManager],
+        prechecked = false,
+    ) {
+        if (!guilds) {
+            guilds = this.managers.get(ManagerNames.GuildManager);
+            if (!guilds) return;
+        }
+
+        if (!prechecked) {
+            const verificationEnabled = (await guilds.getBasicSetting(
+                m.guild,
+                guildSettingNames.VerificationEnabled,
+                SettingType.BOOLEAN,
+            )) as boolean | undefined;
+            if (!verificationEnabled) return;
+        }
 
         const verificationEnabled = (await guilds.getBasicSetting(
             m.guild,
@@ -72,17 +89,6 @@ export default class VerificationManager extends Manager {
             SettingType.BOOLEAN,
         )) as boolean | undefined;
         if (!verificationEnabled) return;
-
-        const verificationChannel = (await guilds.getFancySetting(
-            m.guild,
-            guildSettingNames.VerificationChannel,
-            SettingType.CHANNEL,
-        )) as GuildChannel | undefined;
-        if (
-            !verificationChannel ||
-            !(verificationChannel instanceof TextChannel)
-        )
-            return;
 
         const captcha = new CaptchaGenerator();
         captcha.setCaptcha({
@@ -102,7 +108,7 @@ export default class VerificationManager extends Manager {
 
         const buffer = await captcha.generate();
 
-        const sentMessage = await verificationChannel.send({
+        const sentMessage = await c.send({
             embeds: [
                 defaultEmbed(true)
                     .setTitle("Verification")
@@ -160,6 +166,31 @@ export default class VerificationManager extends Manager {
                 },
             },
         });
+    }
+
+    async onMemberJoin(m: GuildMember) {
+        const guilds = this.managers.get(ManagerNames.GuildManager);
+        if (!guilds) return;
+
+        const verificationEnabled = (await guilds.getBasicSetting(
+            m.guild,
+            guildSettingNames.VerificationEnabled,
+            SettingType.BOOLEAN,
+        )) as boolean | undefined;
+        if (!verificationEnabled) return;
+
+        const verificationChannel = (await guilds.getFancySetting(
+            m.guild,
+            guildSettingNames.VerificationChannel,
+            SettingType.CHANNEL,
+        )) as GuildChannel | undefined;
+        if (
+            !verificationChannel ||
+            !(verificationChannel instanceof TextChannel)
+        )
+            return;
+
+        await this.verifyMember(m, verificationChannel, guilds, true);
     }
 
     async onMessage(m: Message) {
