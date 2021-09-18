@@ -254,30 +254,14 @@ export default class AppManager {
         this.log("Building code");
         execa.commandSync("yarn workspace crossant tsup --minify", execopts);
 
-        for (const s of this.shards.shards.values()) {
-            try {
-                await s.spawn();
-            } catch (e) {
-                console.error(e.stack);
-                try {
-                    s.kill();
-                } catch (e) {
-                    //e
-                }
-                this.shards.createShard(s.id);
-            }
-            this.log(`Started shard ${s.id} after applying updates`);
-            await this.broadcastLog(
-                `Started shard ${s.id} after applying updates`,
-            );
-        }
+        await this.respawnShards(undefined, true);
 
         // await this.respawnShards();
         this.checkingForUpdates = false;
         this.metrics.updating.set(false);
     }
 
-    async respawnShards(ids?: number[]) {
+    async respawnShards(ids?: number[], start = false) {
         this.log("Respawning all shards");
 
         const which: number[] = [];
@@ -291,9 +275,11 @@ export default class AppManager {
         for (const s of this.shards.shards.values()) {
             if (ids && !ids.includes(s.id)) continue;
             try {
-                await this.broadcastLog(`Respawning shard ${s.id}`);
-                if (!s.worker && !s.process) await s.spawn();
-                else await s.respawn();
+                if ((!s.worker && !s.process) || start) await s.spawn();
+                else {
+                    await this.broadcastLog(`Respawning shard ${s.id}`);
+                    await s.respawn();
+                }
                 which.push(s.id);
                 try {
                     await this.broadcastLog(`Respawned shard ${s.id}`);
