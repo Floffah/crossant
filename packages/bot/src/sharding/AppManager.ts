@@ -256,6 +256,7 @@ export default class AppManager {
             await this.respawnShards(
                 message.data?.ids ? message.data.ids : undefined,
             );
+        else if (message.type === "check") await this.checkForUpdates();
     }
 
     async respawnShards(ids?: number[]) {
@@ -263,6 +264,10 @@ export default class AppManager {
 
         const which: number[] = [];
         const faults: number[] = [];
+
+        await this.broadcastLog(
+            `Respawning ${ids ? `shards ${ids.join(", ")}` : "all shards"}`,
+        );
 
         this.metrics.respawning.set(true);
         for (const s of this.shards.shards.values()) {

@@ -42,14 +42,24 @@ export default class VerificationManager extends Manager {
     }
 
     async onLeave(m: GuildMember | PartialGuildMember) {
-        await this.managers.bot.db.guildVerification.delete({
-            where: {
-                guildId_userId: {
-                    guildId: m.guild.id,
-                    userId: m.id,
+        if (
+            await this.managers.bot.db.guildVerification.findUnique({
+                where: {
+                    guildId_userId: {
+                        guildId: m.guild.id,
+                        userId: m.id,
+                    },
                 },
-            },
-        });
+            })
+        )
+            await this.managers.bot.db.guildVerification.delete({
+                where: {
+                    guildId_userId: {
+                        guildId: m.guild.id,
+                        userId: m.id,
+                    },
+                },
+            });
     }
 
     async onMemberJoin(m: GuildMember) {
