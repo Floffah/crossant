@@ -3171,7 +3171,7 @@ __metadata:
     react-dom: ^17.0.2
     react-hotkeys-hook: ^3.4.0
     react-is: ^17.0.2
-    react-query: ^3.23.2
+    react-query: ^3.24.0
     react-use: ^17.3.1
     styled-components: ^5.3.1
     tailwindcss: ^2.2.15
@@ -8462,7 +8462,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-query@npm:^3.23.2":
+"react-query@npm:^3.24.0":
   version: 3.24.0
   resolution: "react-query@npm:3.24.0"
   dependencies:

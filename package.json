@@ -22,7 +22,7 @@
         "packages/*"
     ],
     "scripts": {
-        "vercel-build": "yarn && yarn prisma migrate deploy && yarn prisma generate && yarn workspace crossant-web next build",
+        "vercel-build": "yarn prisma migrate deploy && yarn prisma generate && yarn workspace crossant-web next build",
         "dev:bot": "yarn workspace crossant tsup --watch --minify",
         "dev:run": "node packages/bot/dist/cli.js run --debug",
         "dev:rawrun": "node packages/bot/dist/shardstart.js --debug",
