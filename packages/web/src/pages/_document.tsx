@@ -46,6 +46,7 @@ export default class MyDocument extends Document {
                         href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
                         rel="stylesheet"
                     />
+                    <link rel="icon" type="image/png" href="/assets/icon.png" />
                 </Head>
                 <body>
                     <Main />
