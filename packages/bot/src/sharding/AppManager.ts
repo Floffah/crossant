@@ -190,6 +190,21 @@ export default class AppManager {
         }, 1000 * 60 * 5);
     }
 
+    async shardCreate(shard: Shard) {
+        this.log(`Shard ${shard.id} created`);
+        this.metrics.totalShards.set(this.shards.shards.size);
+
+        shard.on("message", (m) => this.shardMessage(shard, m));
+    }
+
+    async shardMessage(_shard: Shard, message: ShardMessage) {
+        if (message.type === "respawn")
+            await this.respawnShards(
+                message.data?.ids ? message.data.ids : undefined,
+            );
+        else if (message.type === "check") await this.checkForUpdates();
+    }
+
     async checkForUpdates() {
         if (process.env.NODE_ENV === "development") return;
 
@@ -261,21 +276,6 @@ export default class AppManager {
         }
 
         this.metrics.updating.set(false);
-    }
-
-    async shardCreate(shard: Shard) {
-        this.log(`Shard ${shard.id} created`);
-        this.metrics.totalShards.set(this.shards.shards.size);
-
-        shard.on("message", (m) => this.shardMessage(shard, m));
-    }
-
-    async shardMessage(_shard: Shard, message: ShardMessage) {
-        if (message.type === "respawn")
-            await this.respawnShards(
-                message.data?.ids ? message.data.ids : undefined,
-            );
-        else if (message.type === "check") await this.checkForUpdates();
     }
 
     async respawnShards(ids?: number[]) {
