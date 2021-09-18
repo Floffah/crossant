@@ -5,14 +5,24 @@ import { mdiLoading, mdiMoonWaxingCrescent, mdiWeatherSunny } from "@mdi/js";
 import { useRouter } from "next/router";
 import { useSwitchTheme } from "src/lib/hooks/theme";
 
-const NavBar: FC = () => {
+const NavBar: FC<{ showBackground?: boolean }> = (p) => {
     const router = useRouter();
     const { switchTheme, theme } = useSwitchTheme();
     const [session] = useSession();
     const [sendingToLogin, setSendingToLogin] = useState(false);
+    let showBackground = p.showBackground;
+
+    if (typeof showBackground !== "boolean") showBackground = true;
 
     return (
-        <div className="w-full bg-gray-100 dark:bg-gray-900 h-12 shadow-lg fixed top-0 left-0 select-none text-gray-600 dark:text-gray-300 z-50 ">
+        <div
+            className={
+                "w-full h-12 shadow-lg fixed top-0 left-0 select-none text-gray-600 dark:text-gray-300 z-50 " +
+                (showBackground
+                    ? "bg-gray-100 dark:bg-gray-900"
+                    : "backdrop-blur-sm")
+            }
+        >
             <h1
                 className="text-2xl top-2 left-3 relative w-fit inline-block cursor-pointer"
                 onClick={() => router.push("/")}
