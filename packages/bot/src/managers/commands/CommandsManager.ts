@@ -1,5 +1,6 @@
 import { Routes } from "discord-api-types/v9";
 import { ApplicationCommandData, Interaction, Message } from "discord.js";
+import VerificationModule from "src/managers/commands/modules/Verification";
 import { ManagerNames } from "src/managers/common/managers";
 import AdminModule from "src/managers/commands/modules/Admin";
 import BoardsModule from "src/managers/commands/modules/Boards";
@@ -30,8 +31,9 @@ export default class CommandsManager extends Manager {
     initialModules: { new (): Module }[] = [
         AdminModule,
         BoardsModule,
-        UtilModule,
         DevModule,
+        UtilModule,
+        VerificationModule,
     ];
 
     constructor(m: ManagersManager) {
