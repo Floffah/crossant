@@ -254,15 +254,8 @@ export default class AppManager {
         this.log("Building code");
         execa.commandSync("yarn workspace crossant tsup --minify", execopts);
 
-        // await this.respawnShards();
-        this.checkingForUpdates = false;
-
         for (const s of this.shards.shards.values()) {
             try {
-                this.log(`Stopping shard ${s.id} after applying updates`);
-                await this.broadcastLog(
-                    `Starting shard ${s.id} after applying updates`,
-                );
                 await s.spawn();
             } catch (e) {
                 console.error(e.stack);
@@ -273,8 +266,14 @@ export default class AppManager {
                 }
                 this.shards.createShard(s.id);
             }
+            this.log(`Started shard ${s.id} after applying updates`);
+            await this.broadcastLog(
+                `Started shard ${s.id} after applying updates`,
+            );
         }
 
+        // await this.respawnShards();
+        this.checkingForUpdates = false;
         this.metrics.updating.set(false);
     }
 
