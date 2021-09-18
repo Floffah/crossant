@@ -267,9 +267,10 @@ export default class AppManager {
         const which: number[] = [];
         const faults: number[] = [];
 
-        await this.broadcastLog(
-            `Respawning ${ids ? `shards ${ids.join(", ")}` : "all shards"}`,
-        );
+        if (!start)
+            await this.broadcastLog(
+                `Respawning ${ids ? `shards ${ids.join(", ")}` : "all shards"}`,
+            );
 
         this.metrics.respawning.set(true);
         for (const s of this.shards.shards.values()) {
