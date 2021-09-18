@@ -12,6 +12,7 @@ export const tsup: Options = {
         "@pm2/*",
         "captcha-canvas",
         "canvas",
+        "source-map-support",
     ],
     clean: true,
     splitting: true,

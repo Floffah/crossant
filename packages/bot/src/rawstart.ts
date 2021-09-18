@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import "source-map-support/register";
 import Crossant from "./bot/Crossant";
 
 new Crossant().init({

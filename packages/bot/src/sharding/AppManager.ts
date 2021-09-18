@@ -2,7 +2,7 @@ import pm2 from "@pm2/io";
 import { captureException, init, Integrations } from "@sentry/node";
 import axios from "axios";
 import chalk from "chalk";
-import { Shard, ShardingManager, TextChannel } from "discord.js";
+import { MessageEmbed, Shard, ShardingManager, TextChannel } from "discord.js";
 import execa from "execa";
 import * as fs from "fs";
 import { existsSync, readFileSync, writeFileSync } from "fs";
@@ -11,7 +11,6 @@ import git from "isomorphic-git";
 import { DateTime } from "luxon";
 import { resolve } from "path";
 import pluralize from "pluralize";
-import "source-map-support/register";
 import { Config } from "src/config/config";
 import { ShardMessage } from "src/sharding/shardmessages";
 import { defaultEmbed } from "src/util/messages/embeds";
@@ -282,6 +281,7 @@ export default class AppManager {
             } catch (e) {
                 if (this.doSentry) captureException(e);
                 this.log(`Shard ${s.id} failed to respawn. ${e.message}`, true);
+                console.log(e.stack);
                 faults.push(s.id);
 
                 if (s.worker || s.process) {
@@ -304,9 +304,10 @@ export default class AppManager {
                     );
                 } catch (e2) {
                     this.log(
-                        `Worst case scenario happened, failed to respawn shard ${s.id} and couldn't broadcast an error.\n${e}\n${e2}`,
+                        `Worst case scenario happened, failed to respawn shard ${s.id} and couldn't broadcast an error.`,
                         true,
                     );
+                    console.log(e2.stack);
                     if (this.doSentry) captureException(e2);
                     process.exit(0);
                 }
@@ -347,28 +348,33 @@ export default class AppManager {
     }
 
     async broadcastLog(msg: string) {
-        const channelID =
-            this.config.bot.broadcastLog === "disabled"
-                ? "879415229375717406"
-                : this.config.bot.broadcastLog;
-        return await this.shards.broadcastEval(async (c) => {
-            try {
-                const channel = (await c.channels.fetch(channelID)) as
+        return await this.shards.broadcastEval(
+            async (c, ctx) => {
+                // try {
+                const channel = (await c.channels.fetch(ctx.channelID)) as
                     | TextChannel
                     | undefined;
                 if (channel)
                     await channel.send({
-                        embeds: [
-                            defaultEmbed()
-                                .setTitle(`Message from AppManager`)
-                                .setDescription(msg),
-                        ],
+                        embeds: [ctx.embed as MessageEmbed],
                     });
-            } catch (e) {
-                console.error(e);
-                console.log(`Couldn't broadcast:`, msg);
-            }
-        });
+                // } catch (e) {
+                //     console.error(e);
+                //     console.log(`Couldn't broadcast:`, msg);
+                // }
+            },
+            {
+                context: {
+                    channelID:
+                        this.config.bot.broadcastLog === "disabled"
+                            ? "879415229375717406"
+                            : this.config.bot.broadcastLog,
+                    embed: defaultEmbed()
+                        .setTitle(`Message from AppManager`)
+                        .setDescription(msg),
+                },
+            },
+        );
     }
 
     log(msg: string, err = false) {

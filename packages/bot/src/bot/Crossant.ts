@@ -6,7 +6,6 @@ import { existsSync, readFileSync, writeFileSync } from "fs";
 import { parse, stringify } from "ini";
 import { render } from "mustache";
 import { resolve } from "path";
-import "source-map-support/register";
 import { Config } from "src/config/config";
 import ManagersManager from "src/managers/common/ManagersManager";
 import Logger from "src/util/logging/Logger";
