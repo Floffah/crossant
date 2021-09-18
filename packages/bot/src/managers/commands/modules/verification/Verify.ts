@@ -74,6 +74,7 @@ export default class VerifyCommand extends SlashCommand {
             );
         } else {
             await verification.verifyMember(i.member, i.channel, guilds, true);
+
             await i.reply(
                 "A message should be sent in a few seconds with instructions on how to verify",
             );
