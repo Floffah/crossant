@@ -17,10 +17,10 @@ const NavBar: FC<{ showBackground?: boolean }> = (p) => {
     return (
         <div
             className={
-                "w-full h-12 shadow-lg fixed top-0 left-0 select-none text-gray-600 dark:text-gray-300 z-50 " +
+                "w-full h-12 shadow-lg fixed top-0 left-0 select-none z-50 " +
                 (showBackground
-                    ? "bg-gray-100 dark:bg-gray-900"
-                    : "backdrop-blur-sm")
+                    ? "bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300"
+                    : "backdrop-blur-sm text-gray-300")
             }
         >
             <h1

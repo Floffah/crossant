@@ -6,7 +6,7 @@ import NavBar from "../components/navigation/NavBar/NavBar";
 const E404Page: FC = () => {
     return (
         <>
-            <NavBar />
+            <NavBar showBackground={false} />
             <div className="bg-indigo-900 relative overflow-hidden h-screen">
                 <img
                     src={landscape.src}

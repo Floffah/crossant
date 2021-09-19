@@ -1,4 +1,4 @@
-module.exports = require("next-transpile-modules")(["jotai"])({
+module.exports = /*require("next-transpile-modules")(["jotai"])(*/ {
     reactStrictMode: true,
     future: {
         modern: true,
@@ -7,4 +7,4 @@ module.exports = require("next-transpile-modules")(["jotai"])({
     images: {
         domains: ["twemoji.maxcdn.com"],
     },
-});
+}; //);
