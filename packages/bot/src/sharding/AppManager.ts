@@ -207,6 +207,8 @@ export default class AppManager {
             this.checkForUpdates(),
         );
 
+        await this.broadcastLog("Bot started");
+
         await this.checkForUpdates();
 
         setInterval(() => {
