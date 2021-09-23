@@ -134,7 +134,7 @@ export default class Crossant {
         this.readyTime = Date.now();
 
         await this.updatePresence();
-        setInterval(() => this.updatePresence(), 5000);
+        setInterval(() => this.updatePresence(), 10000);
 
         // const supportguild = await this.client.guilds.fetch(
         //     this.config.bot.supportGuild,
