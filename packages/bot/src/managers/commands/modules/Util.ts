@@ -23,7 +23,12 @@ export default class UtilModule extends Module {
     }
 
     async message(m: Message) {
-        if (m.guild && m.mentions.members && !m.author.bot) {
+        if (
+            m.guild &&
+            m.mentions.members &&
+            m.mentions.members.size >= 1 &&
+            !m.author.bot
+        ) {
             const guilds = this.managers.get(ManagerNames.GuildManager);
             if (!guilds) return;
 

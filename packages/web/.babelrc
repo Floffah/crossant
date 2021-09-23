@@ -15,7 +15,6 @@
             }
         ],
         "babel-plugin-polished",
-        "@babel/plugin-transform-react-jsx",
         "@babel/plugin-transform-reserved-words"
     ]
 }

@@ -5,9 +5,9 @@ import { AppProps } from "next/app";
 import React from "react";
 import ErrorBoundary from "src/components/util/ErrorBoundary";
 import { AppRouter } from "src/lib/api/router";
-import RenderSaver from "../components/util/RenderSaver";
 
 import "src/styles/styles.css";
+import RenderSaver from "../components/util/RenderSaver";
 
 function App(p: AppProps) {
     return (

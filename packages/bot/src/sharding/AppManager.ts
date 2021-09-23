@@ -11,9 +11,14 @@ import git from "isomorphic-git";
 import { DateTime } from "luxon";
 import { resolve } from "path";
 import pluralize from "pluralize";
+import semver from "semver/preload";
 import { Config } from "src/config/config";
+import { ShardCache } from "src/sharding/shardcache";
 import { ShardMessage } from "src/sharding/shardmessages";
+import { getMoreRecentlyEdited } from "src/util/files/info";
 import { defaultEmbed } from "src/util/messages/embeds";
+import { parse as flattedParse, stringify as flattedStringify } from "flatted";
+import { parse as jjuParse } from "jju";
 
 const keypress = require("keypress");
 
@@ -21,6 +26,8 @@ export default class AppManager {
     datadir = resolve(process.cwd(), ".crossant");
     configpath = resolve(this.datadir, "config.ini");
     config: Config;
+    cachepath = resolve(this.datadir, "amcache.json");
+    cache: ShardCache;
 
     debugmode?: boolean;
     checkingForUpdates = false;
@@ -44,6 +51,16 @@ export default class AppManager {
         writeFileSync(this.configpath, stringify(this.config));
     }
 
+    readCache() {
+        this.cache = flattedParse(
+            readFileSync(this.cachepath, "utf-8"),
+        ) as ShardCache;
+    }
+
+    writeCache() {
+        writeFileSync(this.configpath, flattedStringify(this.cache));
+    }
+
     async init(opts: { debug?: boolean }) {
         this.debugmode = opts.debug;
 
@@ -55,6 +72,13 @@ export default class AppManager {
         }
 
         this.readConfig();
+
+        if (!existsSync(this.cachepath)) {
+            this.cache = {};
+            this.writeCache();
+        }
+
+        this.readCache();
 
         this.pm2 = pm2.init({
             metrics: {
@@ -228,33 +252,94 @@ export default class AppManager {
             return;
         }
 
-        for (const s of this.shards.shards.values()) {
-            this.log(`Stopping shard ${s.id} to apply updates`);
+        this.readCache();
+        const pkgInfo = jjuParse(
+            readFileSync(resolve(process.cwd(), "package.json"), "utf-8"),
+        );
 
-            try {
-                await this.broadcastLog(
-                    `Stopping shard ${s.id} to apply updates`,
-                );
-                if (s.worker || s.process) s.kill();
-            } catch (e) {
-                console.error(e);
-                if (this.doSentry) captureException(e);
+        let doPrisma = false;
+        let newPrismaTime: number | undefined = undefined;
+
+        if (
+            !this.cache.lastPrismaClientVersion ||
+            semver.gt(
+                pkgInfo.devDependencies["@prisma/client"],
+                this.cache.lastPrismaClientVersion,
+            )
+        )
+            doPrisma = true;
+        else if (
+            !this.cache.lastPrismaCLIVersion ||
+            semver.gt(
+                pkgInfo.devDependencies.prisma,
+                this.cache.lastPrismaCLIVersion,
+            )
+        )
+            doPrisma = true;
+        if (!this.cache.lastPrismaUpdate) doPrisma = true;
+        else {
+            const prismadir = getMoreRecentlyEdited(
+                resolve(process.cwd(), "prisma"),
+                this.cache.lastPrismaUpdate,
+            );
+            if (prismadir) {
+                doPrisma = true;
+                newPrismaTime = prismadir.time;
             }
         }
 
-        this.log("Installing dependencies");
-        execa.commandSync("yarn", execopts);
+        if (doPrisma) {
+            this.cache.lastPrismaUpdate = newPrismaTime;
+            this.cache.lastPrismaClientVersion =
+                pkgInfo.devDependencies["@prisma/client"];
+            this.cache.lastPrismaCLIVersion = pkgInfo.devDependencies["prisma"];
 
-        this.log("Applying database migrations");
-        execa.commandSync("yarn prisma migrate deploy", execopts);
+            this.writeCache();
 
-        this.log("Generating database client");
-        execa.commandSync("yarn prisma generate", execopts);
+            for (const s of this.shards.shards.values()) {
+                this.log(`Stopping shard ${s.id} to apply updates`);
 
-        this.log("Building code");
-        execa.commandSync("yarn workspace crossant tsup --minify", execopts);
+                try {
+                    await this.broadcastLog(
+                        `Stopping shard ${s.id} to apply updates`,
+                    );
+                    if (s.worker || s.process) s.kill();
+                } catch (e) {
+                    console.error(e);
+                    if (this.doSentry) captureException(e);
+                }
+            }
 
-        await this.respawnShards(undefined, true);
+            this.log("Installing dependencies");
+            execa.commandSync("yarn", execopts);
+
+            this.log("Applying database migrations");
+            execa.commandSync("yarn prisma migrate deploy", execopts);
+
+            this.log("Generating database client");
+            execa.commandSync("yarn prisma generate", execopts);
+
+            this.log("Building code");
+            execa.commandSync(
+                "yarn workspace crossant tsup --minify",
+                execopts,
+            );
+
+            await this.respawnShards(undefined, true);
+        } else {
+            this.log("Installing dependencies");
+            execa.commandSync("yarn", execopts);
+
+            this.log("Skipping database migrate & generate");
+
+            this.log("Building code");
+            execa.commandSync(
+                "yarn workspace crossant tsup --minify",
+                execopts,
+            );
+
+            await this.respawnShards();
+        }
 
         // await this.respawnShards();
         this.checkingForUpdates = false;
