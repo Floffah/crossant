@@ -58,7 +58,7 @@ export default class AppManager {
     }
 
     writeCache() {
-        writeFileSync(this.configpath, flattedStringify(this.cache));
+        writeFileSync(this.cachepath, flattedStringify(this.cache));
     }
 
     async init(opts: { debug?: boolean }) {
