@@ -1,5 +1,6 @@
 import { REST } from "@discordjs/rest";
 import { PrismaClient } from "@prisma/client";
+import { init, Integrations } from "@sentry/node";
 import chalk from "chalk";
 import { ActivityOptions, Client } from "discord.js";
 import { existsSync, readFileSync, writeFileSync } from "fs";
@@ -55,21 +56,23 @@ export default class Crossant {
             this.logger = new Logger();
             this.logger.debugEnabled = this.debugmode;
 
-            // this.logger = createLogger({
-            //     levels: {
-            //         error: 0,
-            //         warn: 1,
-            //         info: 2,
-            //         debug: 3,
-            //     },
-            //     level: this.debugmode ? "debug" : "info",
-            //     format: format.json(),
-            //     transports: [
-            //         new transports.Console({
-            //             format: format.combine(format.colorize(), format.simple()),
-            //         }),
-            //     ],
-            // });
+            if (
+                process.env.SHARDPROCESSMODE === "true" &&
+                this.config.sentry &&
+                !this.debugmode
+            ) {
+                init({
+                    dsn: this.config.sentry.dsn,
+                    tracesSampleRate: 1,
+                    environment:
+                        "singleshard-" +
+                        (this.debugmode ? "development" : "production"),
+                    integrations: [
+                        new Integrations.OnUncaughtException(),
+                        new Integrations.OnUnhandledRejection(),
+                    ],
+                });
+            }
 
             this.logger.debug("In debug mode");
 

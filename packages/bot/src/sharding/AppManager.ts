@@ -4,10 +4,12 @@ import axios from "axios";
 import chalk from "chalk";
 import { MessageEmbed, Shard, ShardingManager, TextChannel } from "discord.js";
 import execa from "execa";
+import { parse as flattedParse, stringify as flattedStringify } from "flatted";
 import * as fs from "fs";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { parse, stringify } from "ini";
 import git from "isomorphic-git";
+import { parse as jjuParse } from "jju";
 import { DateTime } from "luxon";
 import { resolve } from "path";
 import pluralize from "pluralize";
@@ -17,10 +19,10 @@ import { ShardCache } from "src/sharding/shardcache";
 import { ShardMessage } from "src/sharding/shardmessages";
 import { getMoreRecentlyEdited } from "src/util/files/info";
 import { defaultEmbed } from "src/util/messages/embeds";
-import { parse as flattedParse, stringify as flattedStringify } from "flatted";
-import { parse as jjuParse } from "jju";
 
 const keypress = require("keypress");
+
+const processmode = true; // YES I KNOW THIS IS VERY EXPENSIVE but the node i use can handle it and workers cannot be used until node-canvas supports worker threads!
 
 export default class AppManager {
     datadir = resolve(process.cwd(), ".crossant");
@@ -105,71 +107,27 @@ export default class AppManager {
         if (this.config.sentry && !this.debugmode) {
             try {
                 this.doSentry = true;
-                const lastCommitSha = this.config.sentry?.lastCommit;
 
-                const dir = process.cwd();
-                const gitlog = await git.log({
-                    fs,
-                    dir,
-                    since: lastCommitSha
-                        ? DateTime.fromMillis(
-                              (
-                                  await git.readCommit({
-                                      oid: lastCommitSha,
-                                      fs,
-                                      dir,
-                                  })
-                              ).commit.author.timestamp,
-                              {
-                                  zone: "utc",
-                              },
-                          ).toJSDate()
-                        : undefined,
+                await this.updateSentryRelease();
+
+                init({
+                    dsn: this.config.sentry.dsn,
+                    tracesSampleRate: 1,
+                    environment:
+                        (processmode ? "appmanager-" : "fullstack") +
+                        (this.debugmode ? "development" : "production"),
+                    integrations: [
+                        new Integrations.OnUncaughtException(),
+                        new Integrations.OnUnhandledRejection(),
+                    ],
+                    // release: require("../../package.json").version,
                 });
 
-                if (gitlog.length > 0) {
-                    const commits = gitlog.map((log) => ({
-                        id: log.oid,
-                        repository: "Floffah/crossant",
-                    }));
-
-                    this.config.sentry.lastCommit = commits[0].id;
-                    this.writeConfig();
-
-                    await axios.post(
-                        this.config.sentry.releases,
-                        {
-                            commits,
-                            version: commits[0].id,
-                            projects: ["crossant-shard"],
-                        },
-                        {
-                            headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `Bearer ${this.config.sentry.authToken}`,
-                            },
-                        },
-                    );
-
-                    init({
-                        dsn: this.config.sentry.dsn,
-                        tracesSampleRate: 1,
-                        environment: this.debugmode
-                            ? "development"
-                            : "production",
-                        integrations: [
-                            new Integrations.OnUncaughtException(),
-                            new Integrations.OnUnhandledRejection(),
-                        ],
-                        // release: require("../../package.json").version,
-                    });
-
-                    this.log("Initialised sentry");
-                }
+                this.log("Initialised sentry");
             } catch (e) {
                 console.error(e);
                 this.log(
-                    "There was a problem while updating sentry commits",
+                    "There was a problem while updating sentry commits and initialising sentry",
                     true,
                 );
                 this.doSentry = false;
@@ -179,10 +137,11 @@ export default class AppManager {
         this.log("Starting shards");
         process.env.SHARD_TIME = `${Date.now()}`;
 
+        if (processmode) process.env.SHARDPROCESSMODE = "true";
+
         this.shards = new ShardingManager(resolve(__dirname, "rawstart.js"), {
             totalShards: "auto",
-            // mode: "worker",
-            mode: "process", // YES I KNOW THIS IS VERY EXPENSIVE but the node i use can handle it and workers cannot be used until node-canvas supports worker threads!
+            mode: processmode ? "process" : "worker",
             token: this.config.bot.token,
             respawn: true,
         });
@@ -214,6 +173,57 @@ export default class AppManager {
         setInterval(() => {
             this.checkForUpdates();
         }, 1000 * 60 * 5);
+    }
+
+    async updateSentryRelease() {
+        if (this.config.sentry && !this.debugmode) {
+            const lastCommitSha = this.config.sentry?.lastCommit;
+
+            const dir = process.cwd();
+            const gitlog = await git.log({
+                fs,
+                dir,
+                since: lastCommitSha
+                    ? DateTime.fromMillis(
+                          (
+                              await git.readCommit({
+                                  oid: lastCommitSha,
+                                  fs,
+                                  dir,
+                              })
+                          ).commit.author.timestamp,
+                          {
+                              zone: "utc",
+                          },
+                      ).toJSDate()
+                    : undefined,
+            });
+
+            if (gitlog.length > 0) {
+                const commits = gitlog.map((log) => ({
+                    id: log.oid,
+                    repository: "Floffah/crossant",
+                }));
+
+                this.config.sentry.lastCommit = commits[0].id;
+                this.writeConfig();
+
+                await axios.post(
+                    this.config.sentry.releases,
+                    {
+                        commits,
+                        version: commits[0].id,
+                        projects: ["crossant-shard"],
+                    },
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${this.config.sentry.authToken}`,
+                        },
+                    },
+                );
+            }
+        }
     }
 
     async shardCreate(shard: Shard) {
@@ -341,6 +351,17 @@ export default class AppManager {
             );
 
             await this.respawnShards();
+        }
+
+        try {
+            await this.updateSentryRelease();
+        } catch (e) {
+            console.error(e);
+            await this.broadcastLog(
+                `There was a problem while trying to notify sentry of new commits:\n${e.stack}`,
+            );
+            for (const shard of this.shards.shards) shard[1].kill();
+            process.exit();
         }
 
         // await this.respawnShards();
