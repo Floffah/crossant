@@ -239,7 +239,6 @@ export default class VerificationManager extends Manager {
                 }
             }
             const correctmsg = await m.reply("Correct!");
-            await m.delete();
 
             const verificationRole = (await guilds.getFancySetting(
                 m.guild,
@@ -249,6 +248,8 @@ export default class VerificationManager extends Manager {
             if (!verificationRole) return;
 
             await m.member.roles.add(verificationRole.id);
+
+            await m.delete();
 
             await this.managers.bot.db.guildVerification.delete({
                 where: {
