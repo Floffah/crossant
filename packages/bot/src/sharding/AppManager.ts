@@ -94,6 +94,9 @@ export default class AppManager {
             tracing: true,
         });
 
+        const e = new Error("whoops");
+        console.log(e.stack);
+
         this.metrics = {
             respawning: this.pm2.metric({ name: "Respawning" }),
             totalShards: this.pm2.metric({
@@ -119,6 +122,7 @@ export default class AppManager {
                     integrations: [
                         new Integrations.OnUncaughtException(),
                         new Integrations.OnUnhandledRejection(),
+                        new Integrations.Http({ tracing: true }),
                     ],
                     // release: require("../../package.json").version,
                 });

@@ -3206,6 +3206,7 @@ __metadata:
     discord.js: ^13.2.0
     dotenv: ^10.0.0
     draftlog: ^1.0.13
+    esbuild: ^0.13.4
     execa: ^5.1.1
     flatted: ^3.2.2
     ini: ^2.0.0

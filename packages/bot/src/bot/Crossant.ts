@@ -82,6 +82,7 @@ export default class Crossant {
                         integrations: [
                             new Integrations.OnUncaughtException(),
                             new Integrations.OnUnhandledRejection(),
+                            new Integrations.Http({ tracing: true }),
                         ],
                     });
                 } catch (e) {
