@@ -56,24 +56,6 @@ export default class Crossant {
             this.logger = new Logger();
             this.logger.debugEnabled = this.debugmode;
 
-            if (
-                process.env.SHARDPROCESSMODE === "true" &&
-                this.config.sentry &&
-                !this.debugmode
-            ) {
-                init({
-                    dsn: this.config.sentry.dsn,
-                    tracesSampleRate: 1,
-                    environment:
-                        "singleshard-" +
-                        (this.debugmode ? "development" : "production"),
-                    integrations: [
-                        new Integrations.OnUncaughtException(),
-                        new Integrations.OnUnhandledRejection(),
-                    ],
-                });
-            }
-
             this.logger.debug("In debug mode");
 
             if (!existsSync(this.datadir)) {
@@ -84,6 +66,29 @@ export default class Crossant {
             }
 
             this.readConfig();
+
+            if (
+                process.env.SHARDPROCESSMODE === "true" &&
+                this.config.sentry &&
+                !this.debugmode
+            ) {
+                try {
+                    init({
+                        dsn: this.config.sentry.dsn,
+                        tracesSampleRate: 1,
+                        environment:
+                            "singleshard-" +
+                            (this.debugmode ? "development" : "production"),
+                        integrations: [
+                            new Integrations.OnUncaughtException(),
+                            new Integrations.OnUnhandledRejection(),
+                        ],
+                    });
+                } catch (e) {
+                    console.error(e);
+                    this.logger.err("Could not initialise sentry");
+                }
+            }
 
             this.client = new Client({
                 intents: [
