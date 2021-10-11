@@ -37,7 +37,11 @@ export default class SetupCommand extends SlashCommand {
                         (
                             Setups[k].options ??
                             ((c: SlashCommandSubcommandBuilder) => c)
-                        )(c.setName(k).setDescription(Setups[k].description)),
+                        )(
+                            c
+                                .setName(k.toLowerCase())
+                                .setDescription(Setups[k].description),
+                        ),
                     );
                 }
 
@@ -59,7 +63,10 @@ export default class SetupCommand extends SlashCommand {
         if (sub === "info") {
             await this.infoCommand(i);
         } else {
-            const setup = Setups[sub as SetupTypes];
+            const setupname = Object.keys(Setups).find(
+                (v) => v.toLowerCase() === sub,
+            );
+            const setup = Setups[setupname as SetupTypes];
             if (!setup) throw "Setup does not exist";
             if (!i.member.permissions.has(setup.permission))
                 throw "No permission";
