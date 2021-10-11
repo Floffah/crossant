@@ -34,7 +34,7 @@ export const Setups: Record<
 > = {
     [SetupTypes.VerifyMessage]: {
         description:
-            "Send a message in the current channel with a verify button and set that as the value of `verification.permanentMessage`",
+            "Send a message in the current channel with a verify button",
         permission: "MANAGE_CHANNELS",
         run: async (i) => {
             const guilds = i.managers.get(ManagerNames.GuildManager);
