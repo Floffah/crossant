@@ -275,7 +275,13 @@ export default class VerificationManager extends Manager {
             )) as Role | undefined;
             if (!verificationRole) return;
 
-            await m.member.roles.add(verificationRole.id);
+            try {
+                await m.member.roles.add(verificationRole.id);
+            } catch (e) {
+                await m.reply(
+                    `Whoops, there was an issue while trying to give you the role. Maybe I dont have permission?`,
+                );
+            }
 
             await m.delete();
 
