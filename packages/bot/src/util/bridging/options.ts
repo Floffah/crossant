@@ -393,6 +393,7 @@ export async function parseToOptions(
             [],
         )}`;
 
+    // @ts-ignore
     return new CommandInteractionOptionResolver(client, finalOptions);
 }
 

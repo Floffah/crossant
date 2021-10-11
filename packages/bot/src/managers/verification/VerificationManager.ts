@@ -3,11 +3,11 @@ import { CaptchaGenerator } from "captcha-canvas";
 import {
     GuildChannel,
     GuildMember,
+    Interaction,
     Message,
     MessageAttachment,
     PartialGuildMember,
     Role,
-    TextBasedChannels,
     TextChannel,
 } from "discord.js";
 import Manager from "src/managers/common/Manager";
@@ -40,6 +40,30 @@ export default class VerificationManager extends Manager {
                 console.error(e);
             }
         });
+        this.managers.bot.client.on("interactionCreate", (i) =>
+            this.onInteraction(i),
+        );
+    }
+
+    async onInteraction(i: Interaction) {
+        if (i.isButton() && i.customId === "verify" && i.guild && i.member) {
+            const guilds = this.managers.get(ManagerNames.GuildManager);
+            if (!guilds) return;
+
+            const verificationEnabled = (await guilds.getBasicSetting(
+                i.guild,
+                guildSettingNames.VerificationEnabled,
+                SettingType.BOOLEAN,
+            )) as boolean | undefined;
+            if (!verificationEnabled) return;
+
+            const member =
+                i.member instanceof GuildMember
+                    ? i.member
+                    : await i.guild.members.fetch(i.user.id);
+
+            await this.verifyMember(member, guilds, true);
+        }
     }
 
     async onLeave(m: GuildMember | PartialGuildMember) {
@@ -65,7 +89,6 @@ export default class VerificationManager extends Manager {
 
     async verifyMember(
         m: GuildMember,
-        c: GuildChannel & TextBasedChannels,
         guilds?: ManagerTypes[ManagerNames.GuildManager],
         prechecked = false,
     ) {
@@ -90,6 +113,17 @@ export default class VerificationManager extends Manager {
         )) as boolean | undefined;
         if (!verificationEnabled) return;
 
+        const verificationChannel = (await guilds.getFancySetting(
+            m.guild,
+            guildSettingNames.VerificationChannel,
+            SettingType.CHANNEL,
+        )) as GuildChannel | undefined;
+        if (
+            !verificationChannel ||
+            !(verificationChannel instanceof TextChannel)
+        )
+            return;
+
         const captcha = new CaptchaGenerator();
         captcha.setCaptcha({
             color: "#818CF8",
@@ -108,7 +142,7 @@ export default class VerificationManager extends Manager {
 
         const buffer = await captcha.generate();
 
-        const sentMessage = await c.send({
+        const sentMessage = await verificationChannel.send({
             embeds: [
                 defaultEmbed(true)
                     .setTitle("Verification")
@@ -169,6 +203,24 @@ export default class VerificationManager extends Manager {
     }
 
     async onMemberJoin(m: GuildMember) {
+        if (m.user.bot) return;
+
+        const guilds = this.managers.get(ManagerNames.GuildManager);
+        if (!guilds) return;
+
+        const verificationEnabled = (await guilds.getBasicSetting(
+            m.guild,
+            guildSettingNames.VerificationEnabled,
+            SettingType.BOOLEAN,
+        )) as boolean | undefined;
+        if (!verificationEnabled) return;
+
+        await this.verifyMember(m, guilds, true);
+    }
+
+    async onMessage(m: Message) {
+        if (!m.guild || !m.member || m.author.bot) return;
+
         const guilds = this.managers.get(ManagerNames.GuildManager);
         if (!guilds) return;
 
@@ -186,25 +238,10 @@ export default class VerificationManager extends Manager {
         )) as GuildChannel | undefined;
         if (
             !verificationChannel ||
-            !(verificationChannel instanceof TextChannel)
+            !(verificationChannel instanceof TextChannel) ||
+            m.channel.id !== verificationChannel.id
         )
             return;
-
-        await this.verifyMember(m, verificationChannel, guilds, true);
-    }
-
-    async onMessage(m: Message) {
-        if (!m.guild || !m.member) return;
-
-        const guilds = this.managers.get(ManagerNames.GuildManager);
-        if (!guilds) return;
-
-        const verificationEnabled = (await guilds.getBasicSetting(
-            m.guild,
-            guildSettingNames.VerificationEnabled,
-            SettingType.BOOLEAN,
-        )) as boolean | undefined;
-        if (!verificationEnabled) return;
 
         const verify = await this.managers.bot.db.guildVerification.findUnique({
             where: {
@@ -216,19 +253,10 @@ export default class VerificationManager extends Manager {
         });
         if (!verify) return;
 
-        if (m.content === verify.captchaValue) {
-            if (verify.sentMessageID) {
-                const verificationChannel = (await guilds.getFancySetting(
-                    m.guild,
-                    guildSettingNames.VerificationChannel,
-                    SettingType.CHANNEL,
-                )) as GuildChannel | undefined;
-                if (
-                    !verificationChannel ||
-                    !(verificationChannel instanceof TextChannel)
-                )
-                    return;
+        if (m.content.toLowerCase() === verify.captchaValue.toLowerCase()) {
+            await m.delete();
 
+            if (verify.sentMessageID) {
                 try {
                     const oldmsg = await verificationChannel.messages.fetch(
                         verify.sentMessageID,
@@ -267,6 +295,26 @@ export default class VerificationManager extends Manager {
                     // e
                 }
             }, 5000);
+        } else {
+            await this.managers.bot.db.guildVerification.delete({
+                where: {
+                    guildId_userId: {
+                        guildId: m.guild.id,
+                        userId: m.author.id,
+                    },
+                },
+            });
+
+            let incorrectmsg = await m.reply(
+                `Incorrect! Please run /verify to start again (or press the green verify button if set up in this guild)`,
+            );
+            await m.delete();
+
+            setTimeout(async () => {
+                incorrectmsg = await incorrectmsg.fetch();
+                if (incorrectmsg.deletable && !incorrectmsg.deleted)
+                    await incorrectmsg.delete();
+            }, 3000);
         }
     }
 }

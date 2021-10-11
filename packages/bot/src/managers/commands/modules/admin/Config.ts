@@ -143,7 +143,7 @@ export default class ConfigCommand extends SlashCommand {
 
         const setting = await guilds.getFullSetting(i.guild, entryName);
 
-        if (!setting || setting.value) {
+        if (!setting) {
             await i.reply({
                 embeds: [
                     defaultEmbed()
@@ -356,7 +356,9 @@ export default class ConfigCommand extends SlashCommand {
                             : "no defaults"
                     }${
                         setting.permission
-                            ? `, **Permission:** \`${setting.permission}\``
+                            ? `, **Permission:** \`${setting.permission
+                                  .toLowerCase()
+                                  .replace("_", " ")}\``
                             : ""
                     }\n`;
                 }

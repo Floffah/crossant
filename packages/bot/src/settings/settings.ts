@@ -32,13 +32,13 @@ export const settingParsers = {
 };
 
 export const guildSettingNames = {
-    // pingMessage
     BotPrefix: "bot.prefix",
     PingMessageEnabled: "pingMessage.enabled",
     PingMessageBlacklist: "pingMessage.blacklist",
     VerificationEnabled: "verification.enabled",
     VerificationChannel: "verification.channel",
     VerificationPostVerifyRole: "verification.postVerifyRole",
+    VerificationPermMessage: "verification.permanentMessage",
 };
 
 export const guildSettings: {
@@ -81,6 +81,12 @@ export const guildSettings: {
         type: SettingType.ROLE,
         description:
             "The role that should be given to members after they are verified.",
+        permission: "MANAGE_CHANNELS",
+    },
+    [guildSettingNames.VerificationPermMessage]: {
+        type: SettingType.STRING,
+        description:
+            "Optional message id of a permanent message in your verification channel that has a button version of the /verify command. Use `/setup verifyMessage` to set this up.",
         permission: "MANAGE_CHANNELS",
     },
 };

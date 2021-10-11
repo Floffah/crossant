@@ -1,5 +1,5 @@
 import { SettingType } from "@prisma/client";
-import { GuildChannel, TextChannel } from "discord.js";
+import { GuildChannel } from "discord.js";
 import IncomingSlashCommand from "src/managers/commands/structures/IncomingSlashCommand";
 import SlashCommand from "src/managers/commands/structures/SlashCommand";
 import { ManagerNames } from "src/managers/common/managers";
@@ -51,20 +51,8 @@ export default class VerifyCommand extends SlashCommand {
         if (!verification) throw "No verification manager";
 
         if (who) {
-            const verificationChannel = (await guilds.getFancySetting(
-                i.guild,
-                guildSettingNames.VerificationChannel,
-                SettingType.CHANNEL,
-            )) as GuildChannel | undefined;
-            if (
-                !verificationChannel ||
-                !(verificationChannel instanceof TextChannel)
-            )
-                throw "No verification channel set up";
-
             await verification.verifyMember(
                 await i.guild.members.fetch(who.id),
-                verificationChannel,
                 guilds,
                 true,
             );
@@ -73,7 +61,7 @@ export default class VerifyCommand extends SlashCommand {
                 `Verifying user in this guild's verification channel...`,
             );
         } else {
-            await verification.verifyMember(i.member, i.channel, guilds, true);
+            await verification.verifyMember(i.member, guilds, true);
 
             await i.reply(
                 "A message should be sent in a few seconds with instructions on how to verify",

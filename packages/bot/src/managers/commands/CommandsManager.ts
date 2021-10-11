@@ -1,11 +1,16 @@
 import { Routes } from "discord-api-types/v9";
-import { ApplicationCommandData, Interaction, Message } from "discord.js";
-import VerificationModule from "src/managers/commands/modules/Verification";
-import { ManagerNames } from "src/managers/common/managers";
+import {
+    ApplicationCommandData,
+    Interaction,
+    Message,
+    MessageActionRow,
+    MessageButton,
+} from "discord.js";
 import AdminModule from "src/managers/commands/modules/Admin";
 import BoardsModule from "src/managers/commands/modules/Boards";
 import DevModule from "src/managers/commands/modules/Dev";
 import UtilModule from "src/managers/commands/modules/Util";
+import VerificationModule from "src/managers/commands/modules/Verification";
 import IncomingSlashCommand, {
     IncomingSlashCommandOptions,
 } from "src/managers/commands/structures/IncomingSlashCommand";
@@ -14,10 +19,11 @@ import SlashCommand, {
     SlashCommandType,
 } from "src/managers/commands/structures/SlashCommand";
 import Manager from "src/managers/common/Manager";
+import { ManagerNames } from "src/managers/common/managers";
 import ManagersManager from "src/managers/common/ManagersManager";
-import { ApplicationCommandTypes } from "src/util/types/enums";
 import Logger from "src/util/logging/Logger";
-import { parseToOptions } from "src/util/bridging/options";
+import { defaultEmbed } from "src/util/messages/embeds";
+import { ApplicationCommandTypes } from "src/util/types/enums";
 import BaseCommand, {
     CommandName,
     CommandType,
@@ -52,7 +58,7 @@ export default class CommandsManager extends Manager {
         this.managers.bot.client.on("interactionCreate", (i) =>
             this.interaction(i),
         );
-        this.managers.bot.client.on("messageCreate", (m) => this.message(m));
+        // this.managers.bot.client.on("messageCreate", (m) => this.message(m));
     }
 
     async registerModule(m: Module) {
@@ -85,14 +91,16 @@ export default class CommandsManager extends Manager {
                 c instanceof SlashCommand &&
                 c.rawbuilder
             ) {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
                 commands.push({
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
                     type: ApplicationCommandTypes.CHAT_INPUT,
                     ...c.rawbuilder.toJSON(),
                 });
             } else
                 commands.push({
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
                     type:
                         c.type === CommandType.MESSAGE
                             ? ApplicationCommandTypes.MESSAGE
@@ -157,54 +165,74 @@ export default class CommandsManager extends Manager {
 
             if (this.aliases.has(cmd)) cmd = this.aliases.get(cmd) as string;
 
-            content = content.replace(new RegExp(`^${cmd} ?`), "");
+            // content = content.replace(new RegExp(`^${cmd} ?`), "");
 
-            if (this.commands.has(`slash@${cmd}`)) {
-                const command = this.commands.get(
-                    `slash@${cmd}`,
-                ) as SlashCommand;
+            if (this.commands.has(`slash@${cmd}`))
+                await msg.reply({
+                    embeds: [
+                        defaultEmbed()
+                            .setTitle("Message commands disabled")
+                            .setDescription(
+                                `For the past couple of months, invoking Crossants commands via messages have been getting phased out. This is because Discord will be enabling a whitelist for Discord bots to read message content.`,
+                            ),
+                    ],
+                    components: [
+                        new MessageActionRow({
+                            components: [
+                                new MessageButton({
+                                    style: "LINK",
+                                    label: "Learn more",
+                                    url: "https://support-dev.discord.com/hc/en-us/articles/4404772028055-Message-Content-Access-Deprecation-for-Verified-Bots",
+                                }),
+                            ],
+                        }),
+                    ],
+                });
 
-                let deferredMessage: Message | undefined = undefined;
-
-                if (command.opts.deferred)
-                    deferredMessage = await msg.reply(
-                        "Please note that message commands will be Disabled on Crossant soon because Discord is making messages a privileged intent.\nProcessing...",
-                    );
-                else
-                    deferredMessage = await msg.reply(
-                        "Please note that message commands will be Disabled on Crossant soon because Discord is making messages a privileged intent.",
-                    );
-
-                try {
-                    const options = await parseToOptions(
-                        cmd,
-                        (command.rawbuilder
-                            ? command.rawbuilder.toJSON().options
-                            : []) ?? [],
-                        content,
-                        this.managers.bot.client,
-                        msg.guild ?? undefined,
-                    );
-                    const inc = new IncomingSlashCommand({
-                        managers: this.managers,
-                        command: command,
-                        interaction: undefined,
-                        deferredMessage,
-                        originalMessage: msg,
-                        simulatedOptions: options,
-                    });
-                    await command.incoming(inc);
-                } catch (e) {
-                    if (typeof e === "string") {
-                        const emsg = `An error occured\n\n\`\`\`\n${e}\n\`\`\``;
-                        await msg.reply(emsg);
-                    } else {
-                        const emsg = `An error occured\n\n\`\`\`\n${e.message}\n\`\`\``;
-                        await msg.reply(emsg);
-                    }
-                    console.error(e);
-                }
-            }
+            // if (this.commands.has(`slash@${cmd}`)) {
+            //     const command = this.commands.get(
+            //         `slash@${cmd}`,
+            //     ) as SlashCommand;
+            //
+            //     let deferredMessage: Message | undefined = undefined;
+            //
+            //     if (command.opts.deferred)
+            //         deferredMessage = await msg.reply(
+            //             "Please note that message commands will be Disabled on Crossant soon because Discord is making messages a privileged intent.\nProcessing...",
+            //         );
+            //     else
+            //         deferredMessage = await msg.reply(
+            //             "Please note that message commands will be Disabled on Crossant soon because Discord is making messages a privileged intent.",
+            //         );
+            //
+            //     try {
+            //         const options = await parseToOptions(
+            //             cmd,
+            //             command.rawbuilder,
+            //             content,
+            //             this.managers.bot.client,
+            //             msg.guild ?? undefined,
+            //         );
+            //         const inc = new IncomingSlashCommand({
+            //             managers: this.managers,
+            //             command: command,
+            //             interaction: undefined,
+            //             deferredMessage,
+            //             originalMessage: msg,
+            //             simulatedOptions: options,
+            //         });
+            //         await command.incoming(inc);
+            //     } catch (e) {
+            //         if (typeof e === "string") {
+            //             const emsg = `An error occured\n\n\`\`\`\n${e}\n\`\`\``;
+            //             await msg.reply(emsg);
+            //         } else {
+            //             const emsg = `An error occured\n\n\`\`\`\n${e.message}\n\`\`\``;
+            //             await msg.reply(emsg);
+            //         }
+            //         console.error(e);
+            //     }
+            // }
         }
     }
 
