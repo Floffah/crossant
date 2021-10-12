@@ -45,24 +45,38 @@ export default class VerificationManager extends Manager {
         );
     }
 
-    async onInteraction(i: Interaction) {
+    async onInteraction(i: Interaction): Promise<any> {
         if (i.isButton() && i.customId === "verify" && i.guild && i.member) {
-            const guilds = this.managers.get(ManagerNames.GuildManager);
-            if (!guilds) return;
+            await i.deferReply({ ephemeral: true });
 
-            const verificationEnabled = (await guilds.getBasicSetting(
-                i.guild,
-                guildSettingNames.VerificationEnabled,
-                SettingType.BOOLEAN,
-            )) as boolean | undefined;
-            if (!verificationEnabled) return;
+            try {
+                const guilds = this.managers.get(ManagerNames.GuildManager);
+                if (!guilds) return i.editReply("No guild manager present");
 
-            const member =
-                i.member instanceof GuildMember
-                    ? i.member
-                    : await i.guild.members.fetch(i.user.id);
+                const verificationEnabled = (await guilds.getBasicSetting(
+                    i.guild,
+                    guildSettingNames.VerificationEnabled,
+                    SettingType.BOOLEAN,
+                )) as boolean | undefined;
+                if (!verificationEnabled)
+                    return i.editReply(
+                        "Verification is not enabled in this server",
+                    );
 
-            await this.verifyMember(member, guilds, true);
+                const member =
+                    i.member instanceof GuildMember
+                        ? i.member
+                        : await i.guild.members.fetch(i.user.id);
+
+                await i.editReply("Verifying...");
+                await this.verifyMember(member, guilds, true);
+            } catch (e) {
+                const msg = `An error occured\n\n\`\`\`\n${
+                    typeof e === "string" ? e : e.message
+                }\n\`\`\``;
+
+                await i.editReply(msg);
+            }
         }
     }
 
@@ -253,9 +267,7 @@ export default class VerificationManager extends Manager {
         });
         if (!verify) return;
 
-        if (m.content.toLowerCase() === verify.captchaValue.toLowerCase()) {
-            await m.delete();
-
+        const deleteOriginalMessage = async () => {
             if (verify.sentMessageID) {
                 try {
                     const oldmsg = await verificationChannel.messages.fetch(
@@ -266,7 +278,12 @@ export default class VerificationManager extends Manager {
                     // e
                 }
             }
+        };
+
+        if (m.content.toLowerCase() === verify.captchaValue.toLowerCase()) {
             const correctmsg = await m.reply("Correct!");
+
+            await deleteOriginalMessage();
 
             const verificationRole = (await guilds.getFancySetting(
                 m.guild,
@@ -310,6 +327,8 @@ export default class VerificationManager extends Manager {
                     },
                 },
             });
+
+            await deleteOriginalMessage();
 
             let incorrectmsg = await m.reply(
                 `Incorrect! Please run /verify to start again (or press the green verify button if set up in this guild)`,

@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { Routes } from "discord-api-types/v9";
 import {
     ApplicationCommandData,
@@ -129,6 +130,18 @@ export default class CommandsManager extends Manager {
                 body: commands,
             },
         );
+        if (this.managers.bot.debugmode) {
+            await this.managers.bot.rest.put(
+                Routes.applicationGuildCommands(
+                    this.managers.bot.client.application.id,
+                    "800781425073979432",
+                ),
+                {
+                    body: commands,
+                },
+            );
+            Logger.inst.debug("Pushed commands to alternate test server");
+        }
         await this.managers.bot.rest.put(
             Routes.applicationCommands(this.managers.bot.client.application.id),
             {
@@ -267,16 +280,16 @@ export default class CommandsManager extends Manager {
                 } as IncomingSlashCommandOptions<SlashCommandType.INTERACTION>);
                 await cmd.incoming(incoming);
             } catch (e) {
-                if (typeof e === "string") {
-                    const msg = `An error occured\n\n\`\`\`\n${e}\n\`\`\``;
-                    if (i.replied) await i.editReply(msg);
-                    else await i.reply(msg);
-                } else {
-                    const msg = `An error occured\n\n\`\`\`\n${e.message}\n\`\`\``;
-                    if (i.replied) await i.editReply(msg);
-                    else await i.reply(msg);
-                }
-                console.error(e);
+                const msg = `An error occured\n\n\`\`\`\n${
+                    typeof e === "string" ? e : e.message
+                }\n\`\`\``;
+
+                await (i.replied || i.deferred ? i.editReply : i.reply).call(
+                    i,
+                    msg,
+                );
+
+                if (msg.toLowerCase().includes("error: ")) captureException(e);
             }
         }
     }

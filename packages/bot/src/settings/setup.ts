@@ -23,7 +23,7 @@ export const Setups: Record<
             b: SlashCommandSubcommandBuilder,
         ) => SlashCommandSubcommandBuilder;
         run: (
-            i: IncomingSlashCommand & {
+            i: Omit<IncomingSlashCommand, "reply"> & {
                 channel: TextBasedChannels & GuildChannel;
                 guild: Guild;
             },
@@ -68,7 +68,7 @@ export const Setups: Record<
                 msg.id,
             );
 
-            await i.reply(`Done!`);
+            await i.editReply(`Done!`);
         },
     },
 };

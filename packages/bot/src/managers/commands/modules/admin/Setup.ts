@@ -82,7 +82,7 @@ export default class SetupCommand extends SlashCommand {
         const setup = Setups[name as SetupTypes];
         if (!setup) throw `${name} is not a valid setup`;
 
-        await i.reply({
+        await i.editReply({
             embeds: [
                 defaultEmbed()
                     .setTitle(name)
