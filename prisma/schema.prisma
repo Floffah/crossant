@@ -20,7 +20,7 @@ model Account {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  guilds Json[]
+  guilds             Json[]
 
   @@unique([providerId, providerAccountId])
 }
@@ -112,6 +112,7 @@ model Guild {
   pingMessages      PingMessage[]
   settings          GuildSetting[]
   GuildVerification GuildVerification[]
+  GuildIntegration  GuildIntegration[]
 }
 
 model GuildSetting {
@@ -170,6 +171,23 @@ model GuildBoardMessage {
   boardId Int
 
   @@id([reactedMessageId, reactedChannelId])
+}
+
+model GuildIntegration {
+  id      Int    @id @default(autoincrement())
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  guildId String
+
+  platform     PlatformType
+  platformName String // e.g. twitch user name
+  filterRegex  String?
+  filterFlags  String?
+
+  @@unique([id, guildId])
+}
+
+enum PlatformType {
+  Twitch
 }
 
 // common

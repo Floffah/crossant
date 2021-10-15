@@ -1,4 +1,3 @@
-import { captureException } from "@sentry/node";
 import { Routes } from "discord-api-types/v9";
 import {
     ApplicationCommandData,
@@ -24,6 +23,7 @@ import { ManagerNames } from "src/managers/common/managers";
 import ManagersManager from "src/managers/common/ManagersManager";
 import Logger from "src/util/logging/Logger";
 import { defaultEmbed } from "src/util/messages/embeds";
+import { userErrorReport } from "src/util/messages/feedback";
 import { ApplicationCommandTypes } from "src/util/types/enums";
 import BaseCommand, {
     CommandName,
@@ -280,16 +280,10 @@ export default class CommandsManager extends Manager {
                 } as IncomingSlashCommandOptions<SlashCommandType.INTERACTION>);
                 await cmd.incoming(incoming);
             } catch (e) {
-                const msg = `An error occured\n\n\`\`\`\n${
-                    typeof e === "string" ? e : e.message
-                }\n\`\`\``;
-
                 await (i.replied || i.deferred ? i.editReply : i.reply).call(
                     i,
-                    msg,
+                    ...userErrorReport(e, this.managers),
                 );
-
-                if (msg.toLowerCase().includes("error: ")) captureException(e);
             }
         }
     }

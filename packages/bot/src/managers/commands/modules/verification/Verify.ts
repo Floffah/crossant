@@ -61,7 +61,21 @@ export default class VerifyCommand extends SlashCommand {
                 `Verifying user in this guild's verification channel...`,
             );
         } else {
-            await verification.verifyMember(i.member, guilds, true);
+            const existing =
+                await this.module.managers.bot.db.guildVerification.findUnique({
+                    where: {
+                        guildId_userId: {
+                            guildId: i.guild.id,
+                            userId: i.member.id,
+                        },
+                    },
+                });
+
+            if (existing) {
+                throw "You are already being verified!";
+            }
+
+            await verification.verifyMember(i.member, guilds, true, false);
 
             await i.reply(
                 "A message should be sent in a few seconds with instructions on how to verify",

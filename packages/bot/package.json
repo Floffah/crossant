@@ -18,11 +18,12 @@
         "@types/ini": "^1.3.31",
         "@types/luxon": "^2.0.5",
         "@types/mustache": "^4.1.2",
-        "@types/node": "^16.10.3",
+        "@types/node": "^16.11.0",
         "@types/pluralize": "^0.0.29",
+        "@types/tailwindcss": "^2.2.1",
         "discord-api-types": "^0.23.1",
         "tsup": "^5.4.0",
-        "typescript": "^4.4.3"
+        "typescript": "^4.4.4"
     },
     "dependencies": {
         "@discordjs/builders": "^0.6.0",
@@ -33,7 +34,7 @@
         "@sentry/tracing": "^6.13.3",
         "@types/jju": "^1.4.2",
         "@types/semver": "^7.3.8",
-        "axios": "^0.22.0",
+        "axios": "^0.23.0",
         "canvas": "^2.8.0",
         "captcha-canvas": "^3.0.4",
         "chalk": "^4.1.2",
@@ -55,6 +56,7 @@
         "pretty-ms": "^7.0.1",
         "semver": "^7.3.5",
         "source-map-support": "^0.5.20",
-        "typed-emitter": "^1.3.1"
+        "tailwindcss": "^2.2.17",
+        "typed-emitter": "^1.4.0"
     }
 }

@@ -161,11 +161,15 @@ export default class IncomingSlashCommand<
     async deleteReply() {
         if (
             this.commandType === SlashCommandType.INTERACTION &&
-            this.interaction
+            this.interaction &&
+            this.interaction.replied
         ) {
             await this.interaction.deleteReply();
         } else if (this.lastSimulatedMessage) {
-            if (this.deleteSimulatedTimeout)
+            if (
+                this.deleteSimulatedTimeout &&
+                this.lastSimulatedMessage.deletable
+            )
                 clearTimeout(this.deleteSimulatedTimeout);
             await this.lastSimulatedMessage.delete();
         }

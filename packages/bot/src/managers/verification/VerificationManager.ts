@@ -15,6 +15,7 @@ import { ManagerNames, ManagerTypes } from "src/managers/common/managers";
 import ManagersManager from "src/managers/common/ManagersManager";
 import { guildSettingNames } from "src/settings/settings";
 import { defaultEmbed } from "src/util/messages/embeds";
+import { userErrorReport } from "src/util/messages/feedback";
 
 export default class VerificationManager extends Manager {
     constructor(m: ManagersManager) {
@@ -68,14 +69,25 @@ export default class VerificationManager extends Manager {
                         ? i.member
                         : await i.guild.members.fetch(i.user.id);
 
-                await i.editReply("Verifying...");
-                await this.verifyMember(member, guilds, true);
-            } catch (e) {
-                const msg = `An error occured\n\n\`\`\`\n${
-                    typeof e === "string" ? e : e.message
-                }\n\`\`\``;
+                const existing =
+                    await this.managers.bot.db.guildVerification.findUnique({
+                        where: {
+                            guildId_userId: {
+                                guildId: i.guild.id,
+                                userId: member.id,
+                            },
+                        },
+                    });
 
-                await i.editReply(msg);
+                if (existing) {
+                    await i.editReply("You are already being verified!");
+                    return;
+                }
+
+                await i.editReply("Verifying...");
+                await this.verifyMember(member, guilds, true, false);
+            } catch (e) {
+                await i.editReply(...userErrorReport(e, this.managers));
             }
         }
     }
@@ -105,6 +117,7 @@ export default class VerificationManager extends Manager {
         m: GuildMember,
         guilds?: ManagerTypes[ManagerNames.GuildManager],
         prechecked = false,
+        deletePrevious = true,
     ) {
         if (!guilds) {
             guilds = this.managers.get(ManagerNames.GuildManager);
@@ -169,14 +182,15 @@ export default class VerificationManager extends Manager {
         });
 
         if (
-            await this.managers.bot.db.guildVerification.findUnique({
+            deletePrevious &&
+            (await this.managers.bot.db.guildVerification.findUnique({
                 where: {
                     guildId_userId: {
                         guildId: m.guild.id,
                         userId: m.id,
                     },
                 },
-            })
+            }))
         )
             await this.managers.bot.db.guildVerification.delete({
                 where: {
@@ -339,7 +353,7 @@ export default class VerificationManager extends Manager {
                 incorrectmsg = await incorrectmsg.fetch();
                 if (incorrectmsg.deletable && !incorrectmsg.deleted)
                     await incorrectmsg.delete();
-            }, 3000);
+            }, 1000 * 20);
         }
     }
 }
