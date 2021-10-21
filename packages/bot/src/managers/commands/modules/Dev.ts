@@ -1,4 +1,5 @@
 import DevCommand from "src/managers/commands/modules/dev/Dev";
+import ExperimentsCommand from "src/managers/commands/modules/dev/Experiments";
 import Module from "src/managers/commands/structures/Module";
 
 export default class DevModule extends Module {
@@ -7,6 +8,6 @@ export default class DevModule extends Module {
     }
 
     load() {
-        this.registerCommand(new DevCommand());
+        this.registerCommand(new DevCommand(), new ExperimentsCommand());
     }
 }
