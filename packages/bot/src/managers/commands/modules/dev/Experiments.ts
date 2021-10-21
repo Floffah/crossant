@@ -257,9 +257,17 @@ export default class ExperimentsCommand extends SlashCommand {
             | "GUILD"
             | "BOTH";
 
-        this.module.managers.bot.db.experiment.create({
-            data: {
+        await this.module.managers.bot.db.experiment.upsert({
+            where: {
                 name,
+            },
+            create: {
+                name,
+                description,
+                stage,
+                effector,
+            },
+            update: {
                 description,
                 stage,
                 effector,
