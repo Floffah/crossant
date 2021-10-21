@@ -9,7 +9,7 @@ export function userErrorReport(
     managers: ManagersManager,
 ): Parameters<typeof IncomingSlashCommand.prototype.reply> {
     const formattedError = `\`\`\`${
-        "message" in error ? error.message : error
+        typeof error === "string" ? error : error.message
     }\`\`\``;
 
     if (formattedError.toLowerCase().includes("error: "))
