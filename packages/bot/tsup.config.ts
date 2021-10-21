@@ -15,7 +15,7 @@ export const tsup: Options = {
         "source-map-support",
     ],
     clean: true,
-    splitting: true,
+    splitting: false,
     bundle: true,
     target: "node16",
     dts: false,

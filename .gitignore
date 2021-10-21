@@ -1,6 +1,7 @@
 .env
 data
 .crossant
+!packages/web/src/lib/data
 
 # Created by https://www.toptal.com/developers/gitignore/api/webstorm,intellij,yarn,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=webstorm,intellij,yarn,node

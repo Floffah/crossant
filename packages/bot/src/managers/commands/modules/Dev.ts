@@ -1,4 +1,4 @@
-import DevCommand from "src/managers/commands/dev/Dev";
+import DevCommand from "src/managers/commands/modules/dev/Dev";
 import Module from "src/managers/commands/structures/Module";
 
 export default class DevModule extends Module {

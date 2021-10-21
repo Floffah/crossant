@@ -7,6 +7,35 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// cache
+model Cache {
+  name  String @unique
+  value String
+}
+
+// experiments
+model Experiment {
+  name        String              @id @unique
+  stage       ExperimentStageType
+  description String
+  effector    ExperimentEffector
+
+  guildsEnabled Guild[]
+  usersEnabled  DiscordUser[]
+}
+
+enum ExperimentStageType {
+  CANARY
+  BETA
+  RC
+}
+
+enum ExperimentEffector {
+  USER
+  GUILD
+  BOTH
+}
+
 // auth
 model Account {
   id                 String    @id @default(cuid())
@@ -81,6 +110,7 @@ model DiscordUser {
 
   // references
   GuildVerification GuildVerification[]
+  experiments       Experiment[]
 }
 
 model PingMessage {
@@ -113,6 +143,7 @@ model Guild {
   settings          GuildSetting[]
   GuildVerification GuildVerification[]
   GuildIntegration  GuildIntegration[]
+  experiments       Experiment[]
 }
 
 model GuildSetting {
