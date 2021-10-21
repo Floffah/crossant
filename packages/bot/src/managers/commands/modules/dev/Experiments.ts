@@ -7,7 +7,7 @@ export default class ExperimentsCommand extends SlashCommand {
     constructor() {
         super(
             "experiments",
-            "Get information about features currently in development, and for bot admins to enable experiments on more users/servers",
+            "Get and set information about features currently in development",
             (s) =>
                 s
                     .addSubcommand((c) =>
