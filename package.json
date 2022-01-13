@@ -24,12 +24,12 @@
         "packages/*"
     ],
     "scripts": {
-        "vercel-build": "yarn prisma migrate-prod && yarn prisma-generate-prod && yarn workspace crossant-web next build",
+        "vercel-build": "yarn migrate-prod && yarn prisma-generate-prod && yarn workspace crossant-web next build",
         "dev:bot": "yarn workspace crossant tsup --watch --minify",
         "dev:run": "node packages/bot/dist/cli.js run --debug",
         "dev:rawrun": "node packages/bot/dist/shardstart.js --debug",
         "dev:web": "yarn workspace crossant-web next dev",
-        "prod:prepare": "git pull && yarn && yarn prisma migrate-prod && yarn prisma-generate-prod && yarn workspace crossant tsup --minify",
+        "prod:prepare": "git pull && yarn && yarn migrate-prod && yarn prisma-generate-prod && yarn workspace crossant tsup --minify",
         "deps": "yarn ncu -u --deep --reject discord-api-types",
         "prisma-generate-prod": "PRISMA_CLIENT_ENGINE_TYPE='dataproxy' prisma generate",
         "migrate-prod": "DATABASE_URL=\"$MIGRATE_DATABASE_URL\" prisma migrate deploy"
