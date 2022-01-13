@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind screens;
+@tailwind variants;
+@tailwind utilities;
+
+body, html {
+    text-rendering: optimizeLegibility;
+    image-rendering: optimizeQuality;
+    color-rendering: optimizeQuality;
+    shape-rendering: geometricPrecision;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    @apply text-slate-400;
+}
+
+*:is(h1, h2, h3, h4, h5, h6) a {
+    @apply text-slate-400;
+}
+
+*:is(h1, h2, h3, h4, h5, h6) a:active {
+    @apply text-blue-400 !important;
+}
+
+a {
+    @apply text-blue-400;
+}
+
+a:active {
+    @apply text-blue-600 !important;
+}
+
+@layer utilities {
+    .translate-center {
+        transform: translate(-50%, -50%);
+        left: 50%;
+        top: 50%;
+        position: absolute;
+    }
+    .translate-center-x {
+        transform:translateX(-50%);
+        left: 50%;
+    }
+    .translate-center-y {
+        transform: translateY(-50%);
+        top: 50%;
+        position: absolute;
+    }
+    @media screen(sm) {
+        .translate-none {
+            transform: unset;
+            position: relative;
+            left: unset;
+            top: unset;
+        }
+    }
+}

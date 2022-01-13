@@ -7,11 +7,11 @@
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources" />
       <excludeFolder url="file://$MODULE_DIR$/.yarn/cache" />
-      <excludeFolder url="file://$MODULE_DIR$/packages/bot/dist" />
       <excludeFolder url="file://$MODULE_DIR$/.husky/_" />
-      <excludeFolder url="file://$MODULE_DIR$/packages/components/dist" />
       <excludeFolder url="file://$MODULE_DIR$/data" />
       <excludeFolder url="file://$MODULE_DIR$/.crossant" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/components/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/bot/dist" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
